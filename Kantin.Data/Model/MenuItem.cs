@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Kantin.Data.Model
 {
-    public class MenuItem : IEntity
+    public class MenuItem : BaseEntity
     {
-        public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public double Price { get; set; }
         public double Discount { get; set; }
         public double Available { get; set; }
-
         public virtual ICollection<MenuAddOnItem> MenuAddOnItems { get; set; }
+
+        public MenuItem()
+        {
+            MenuAddOnItems = new List<MenuAddOnItem>();
+        }
     }
 }

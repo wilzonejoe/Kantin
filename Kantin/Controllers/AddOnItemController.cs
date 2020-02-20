@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kantin.Controllers
 {
     [Route("api/[controller]")]
-    public class MenuItemController : Controller
+    public class AddOnItemController : Controller
     {
         private KantinEntities _entities;
 
-        public MenuItemController(KantinEntities entities)
+        public AddOnItemController(KantinEntities entities)
         {
             _entities = entities;
         }
@@ -21,7 +21,7 @@ namespace Kantin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            using (var service = new MenuItemsProvider(_entities))
+            using (var service = new AddOnItemsProvider(_entities))
             {
                 var result = await service.GetAll(null);
                 return Ok(result);
@@ -32,7 +32,7 @@ namespace Kantin.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            using (var service = new AddOnItemsProvider(_entities))
             {
                 var result = await service.Get(id);
                 return Ok(result);
@@ -41,22 +41,22 @@ namespace Kantin.Controllers
 
         // POST api/<controller>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]MenuItem menuItem)
+        public async Task<IActionResult> Post([FromBody]AddOnItem addOnItem)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            using (var service = new AddOnItemsProvider(_entities))
             {
-                var result = await service.CreateAsync(menuItem);
-                return Created($"api/menuItem/{result.Id}", result);
+                var result = await service.CreateAsync(addOnItem);
+                return Created($"api/addOnItem/{result.Id}", result);
             }
         }
 
         // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]MenuItem menuItem)
+        public async Task<IActionResult> Put(int id, [FromBody]AddOnItem addOnItem)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            using (var service = new AddOnItemsProvider(_entities))
             {
-                var result = await service.UpdateAsync(id, menuItem);
+                var result = await service.UpdateAsync(id, addOnItem);
                 return Ok(result);
             }
         }
@@ -65,7 +65,7 @@ namespace Kantin.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            using (var service = new AddOnItemsProvider(_entities))
             {
                 var result = await service.Delete(id);
                 if (result)

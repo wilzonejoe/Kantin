@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kantin.Data.Model
+﻿namespace Kantin.Data.Model
 {
-    public class MenuAddOnItem : IEntity
+    public class MenuAddOnItem : BaseEntity
     {
-        public int Id { get; set; }
         public int MenuItemId { get; set; }
         public int AddOnItemId { get; set; }
         public MenuItem MenutItem { get; set; }

@@ -1,11 +1,12 @@
 ﻿using Kantin.Data;
 using Kantin.Service.Model;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kantin.Service.Interface
 {
-    public interface IService<T> where T : IEntity
+    public interface IService<T> where T : BaseEntity
     {
         public Task<T> CreateAsync(T entity);
         public Task<bool> Delete(int id); 
