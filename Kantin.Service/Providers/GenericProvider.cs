@@ -11,11 +11,12 @@ namespace Kantin.Service.Providers
     public abstract class GenericProvider<T> : IService<T>, IDisposable
         where T : BaseEntity
     {
-        private KantinEntities _entities;
+        private KantinEntities _context;
+        protected KantinEntities Context => _context;
 
-        public GenericProvider(KantinEntities entities)
+        public GenericProvider(KantinEntities context)
         {
-            _entities = entities;
+            _context = context;
         }
 
         public abstract Task<T> Get(int id);
@@ -23,16 +24,16 @@ namespace Kantin.Service.Providers
 
         public virtual async Task<T> CreateAsync(T entity)
         {
-            var result = await _entities.AddAsync(entity);
-            await _entities.SaveChangesAsync();
+            var result = await _context.AddAsync(entity);
+            await _context.SaveChangesAsync();
             return (T)result.Entity;
         }
 
         public virtual async Task<bool> Delete(int id)
         {
             var item = await GetItemAsync(id);
-            var result = _entities.Remove(item);
-            await _entities.SaveChangesAsync();
+            var result = _context.Remove(item);
+            await _context.SaveChangesAsync();
             return result != null;
         }
 
@@ -43,14 +44,14 @@ namespace Kantin.Service.Providers
             if (entity.Id != item.Id)
                 entity.Id = item.Id;
 
-            _entities.Entry(item).CurrentValues.SetValues(entity);
-            await _entities.SaveChangesAsync();
+            _context.Entry(item).CurrentValues.SetValues(entity);
+            await _context.SaveChangesAsync();
             return await GetItemAsync(id);
         }
 
         private async Task<T> GetItemAsync(int id)
         {
-            var item = await _entities.FindAsync(typeof(T), id);
+            var item = await _context.FindAsync(typeof(T), id);
 
             if (item == null)
                 throw new ItemNotFoundException();
@@ -60,7 +61,7 @@ namespace Kantin.Service.Providers
 
         public void Dispose()
         {
-            _entities?.Dispose();
+            _context?.Dispose();
         }
     }
 }

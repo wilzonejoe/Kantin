@@ -10,16 +10,13 @@ namespace Kantin.Service.Providers
 {
     public class MenuItemsProvider : GenericProvider<MenuItem>
     {
-        private KantinEntities _entities;
-
-        public MenuItemsProvider(KantinEntities entities) : base(entities)
+        public MenuItemsProvider(KantinEntities context) : base(context)
         {
-            _entities = entities;
         }
 
         public override async Task<MenuItem> Get(int id)
         {
-            var menuItem = await _entities.MenuItems
+            var menuItem = await Context.MenuItems
                 .Include(m => m.MenuAddOnItems)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -31,7 +28,7 @@ namespace Kantin.Service.Providers
 
         public override async Task<IEnumerable<MenuItem>> GetAll(Query query)
         {
-            return await _entities.MenuItems.ToListAsync();
+            return await Context.MenuItems.ToListAsync();
         }
     }
 }
