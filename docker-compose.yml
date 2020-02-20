@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  kantin:
+    links:  
+      - sqlserverService  
+    image: ${DOCKER_REGISTRY-}kantin
+    build:
+      context: .
+      dockerfile: Kantin/Dockerfile
+
+  sqlserverService:  
+    image: microsoft/mssql-server-linux:2017-latest  
+    hostname: 'sqlserver'  
+    environment:  
+        ACCEPT_EULA: Y  
+        SA_PASSWORD: "123Kantin!@#"  
+    volumes:  
+        - ./data/mssql:/var/opt/mssql3  
+    ports:  
+        - '1433:1433'  
+    expose:  
+        - 1433
