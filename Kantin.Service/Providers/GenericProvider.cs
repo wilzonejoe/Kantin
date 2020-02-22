@@ -9,31 +9,38 @@ using System.Threading.Tasks;
 namespace Kantin.Service.Providers
 {
     public abstract class GenericProvider<T> : IService<T>, IDisposable
-        where T : BaseEntity
+        where T : class
     {
-        private KantinEntities _context;
-        protected KantinEntities Context => _context;
+        protected KantinEntities Context { get; private set; }
 
         public GenericProvider(KantinEntities context)
         {
-            _context = context;
+            Context = context;
         }
 
-        public abstract Task<T> Get(int id);
-        public abstract Task<IEnumerable<T>> GetAll(Query query);
+        public virtual async Task<IEnumerable<T>> GetAll(Query query)
+        {
+            var queryable = Context.Set<T>().AsQueryable();
+            return new List<T>(queryable);
+        }
+
+        public virtual async Task<T> Get(int id)
+        {
+            return await GetItemAsync(id);
+        }
 
         public virtual async Task<T> CreateAsync(T entity)
         {
-            var result = await _context.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            var result = await Context.AddAsync(entity);
+            await Context.SaveChangesAsync();
             return (T)result.Entity;
         }
 
         public virtual async Task<bool> Delete(int id)
         {
             var item = await GetItemAsync(id);
-            var result = _context.Remove(item);
-            await _context.SaveChangesAsync();
+            var result = Context.Remove(item);
+            await Context.SaveChangesAsync();
             return result != null;
         }
 
@@ -41,17 +48,20 @@ namespace Kantin.Service.Providers
         {
             var item = await GetItemAsync(id);
 
-            if (entity.Id != item.Id)
-                entity.Id = item.Id;
+            if (item is BaseEntity exitingItem && entity is BaseEntity baseEntity)
+            {
+                if (baseEntity.Id != exitingItem.Id)
+                    baseEntity.Id = exitingItem.Id;
+            }
 
-            _context.Entry(item).CurrentValues.SetValues(entity);
-            await _context.SaveChangesAsync();
+            Context.Entry(item).CurrentValues.SetValues(entity);
+            await Context.SaveChangesAsync();
             return await GetItemAsync(id);
         }
 
         private async Task<T> GetItemAsync(int id)
         {
-            var item = await _context.FindAsync(typeof(T), id);
+            var item = await Context.FindAsync(typeof(T), id);
 
             if (item == null)
                 throw new ItemNotFoundException();
@@ -61,7 +71,7 @@ namespace Kantin.Service.Providers
 
         public void Dispose()
         {
-            _context?.Dispose();
+            Context?.Dispose();
         }
     }
 }

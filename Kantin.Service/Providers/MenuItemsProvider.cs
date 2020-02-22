@@ -25,10 +25,5 @@ namespace Kantin.Service.Providers
 
             return menuItem;
         }
-
-        public override async Task<IEnumerable<MenuItem>> GetAll(Query query)
-        {
-            return await Context.MenuItems.ToListAsync();
-        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Kantin.Service.Interface
 {
-    public interface IService<T> where T : BaseEntity
+    public interface IService<T> where T : class
     {
         public Task<T> CreateAsync(T entity);
         public Task<bool> Delete(int id); 
