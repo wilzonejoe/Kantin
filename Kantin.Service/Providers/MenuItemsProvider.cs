@@ -1,9 +1,7 @@
 ﻿using Kantin.Data;
 using Kantin.Data.Model;
 using Kantin.Service.Exceptions;
-using Kantin.Service.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kantin.Service.Providers

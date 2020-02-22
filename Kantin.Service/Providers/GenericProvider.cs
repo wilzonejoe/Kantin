@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Kantin.Service.Providers
 {
     public abstract class GenericProvider<T> : IService<T>, IDisposable
-        where T : class
+        where T : BaseEntity
     {
         protected KantinEntities Context { get; private set; }
 
@@ -48,11 +48,8 @@ namespace Kantin.Service.Providers
         {
             var item = await GetItemAsync(id);
 
-            if (item is BaseEntity exitingItem && entity is BaseEntity baseEntity)
-            {
-                if (baseEntity.Id != exitingItem.Id)
-                    baseEntity.Id = exitingItem.Id;
-            }
+            if (entity.Id != item.Id)
+                entity.Id = item.Id;
 
             Context.Entry(item).CurrentValues.SetValues(entity);
             await Context.SaveChangesAsync();
