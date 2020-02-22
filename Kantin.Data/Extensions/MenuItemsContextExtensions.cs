@@ -11,12 +11,5 @@ namespace Kantin.Data.Extensions
                 .HasMany(m => m.MenuAddOnItems)
                 .WithOne(mad => mad.MenutItem);
         }
-
-        public static void SetMenuItemsPropertyAttributes(this ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<MenuItem>()
-                .Property(m => m.Id)
-                .ValueGeneratedOnAdd();
-        }
     }
 }

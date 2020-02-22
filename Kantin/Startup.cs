@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using System.Text.Json;
 
 namespace Kantin
@@ -23,11 +24,8 @@ namespace Kantin
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.IgnoreNullValues = true;
-            });
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
             // Add framework services.
             var connectionString = Configuration.GetConnectionString("SqlConnection");
             services.AddDbContext<KantinEntities>(options => options.UseSqlServer(connectionString));

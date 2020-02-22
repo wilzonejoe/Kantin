@@ -17,15 +17,7 @@ namespace Kantin.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            SetPropertyAttribute(modelBuilder);
             SetRelation(modelBuilder);
-        }
-
-        private void SetPropertyAttribute(ModelBuilder modelBuilder)
-        {
-            modelBuilder.SetMenuItemsPropertyAttributes();
-            modelBuilder.SetAddOnItemsPropertyAttributes();
-            modelBuilder.SetMenuAddOnItemsPropertyAttributes();
         }
 
         private void SetRelation(ModelBuilder modelBuilder)

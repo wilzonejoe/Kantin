@@ -2,14 +2,14 @@ version: '3.4'
 
 services:
   kantin:
-    links:  
-      - sqlserverService  
     image: ${DOCKER_REGISTRY-}kantin
     build:
       context: .
       dockerfile: Kantin/Dockerfile
+    links:  
+      - sqlserver
 
-  sqlserverService:  
+  sqlserver:  
     image: microsoft/mssql-server-linux:2017-latest  
     hostname: 'sqlserver'  
     environment:  
