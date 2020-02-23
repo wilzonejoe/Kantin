@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Kantin.Data;
-using Kantin.Data.Model;
+using Kantin.Data.Models;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +11,7 @@ namespace Kantin.Controllers
     {
         private KantinEntities _entities;
 
-        public AddOnItemController(KantinEntities entities)
-        {
-            _entities = entities;
-        }
-
+        public AddOnItemController(KantinEntities entities) { _entities = entities; }
 
         // GET: api/<controller>
         [HttpGet]
@@ -70,7 +66,7 @@ namespace Kantin.Controllers
                 var result = await service.Delete(id);
                 if (result)
                     return NoContent();
-                
+
                 return NotFound();
             }
         }

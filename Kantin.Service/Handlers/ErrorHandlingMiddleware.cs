@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Kantin.Data.Exceptions;
+using Kantin.Data.Exceptions.Enums;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -14,7 +16,7 @@ namespace Kantin.Service.Exceptions
             this.next = next;
         }
 
-        public async Task Invoke(HttpContext context /* other dependencies */)
+        public async Task Invoke(HttpContext context)
         {
             try
             {
@@ -26,11 +28,12 @@ namespace Kantin.Service.Exceptions
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var code = HttpStatusCode.InternalServerError;
+            object innerError = null;
 
-            switch (ex)
+            switch (exception)
             {
                 case ItemNotFoundException itemNotFoundException:
                     code = HttpStatusCode.NotFound;
@@ -40,10 +43,15 @@ namespace Kantin.Service.Exceptions
                     break;
                 case BadRequestException badRequestException:
                     code = HttpStatusCode.BadRequest;
+
+                    if (badRequestException.Type == BadRequestType.Validation)
+                        innerError = badRequestException.ValidationResults;
+
                     break;
             }
 
-            var result = JsonConvert.SerializeObject(new { error = ex.Message });
+            var error = new { Error = innerError ?? exception.Message };
+            var result = JsonConvert.SerializeObject(error);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
             return context.Response.WriteAsync(result);

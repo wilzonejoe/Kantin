@@ -1,4 +1,4 @@
-﻿using Kantin.Data.Model;
+﻿using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kantin.Data.Extensions

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Kantin.Data.Models.Abstracts;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Kantin.Data.Model
+namespace Kantin.Data.Models
 {
-    public class AddOnItem : BaseEntity
+    public class AddOnItem : ValidationEntity
     {
         [Required]
         [MaxLength(50)]
@@ -14,7 +15,13 @@ namespace Kantin.Data.Model
 
         public double Price { get; set; }
         public double Discount { get; set; }
-        public double Available { get; set; }
+        public bool Available { get; set; }
         public virtual ICollection<MenuAddOnItem> MenuAddOnItems { get; set; }
+
+        public AddOnItem() : base()
+        {
+            Available = true;
+            MenuAddOnItems = new List<MenuAddOnItem>();
+        }
     }
 }

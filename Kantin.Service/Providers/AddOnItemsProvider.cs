@@ -1,18 +1,14 @@
 ﻿using Kantin.Data;
-using Kantin.Data.Model;
-using Kantin.Service.Exceptions;
-using Kantin.Service.Model;
+using Kantin.Data.Models;
+using Kantin.Data.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kantin.Service.Providers
 {
     public class AddOnItemsProvider : GenericProvider<AddOnItem>
     {
-        public AddOnItemsProvider(KantinEntities context) : base(context)
-        {
-        }
+        public AddOnItemsProvider(KantinEntities context) : base(context) { }
 
         public override async Task<AddOnItem> Get(int id)
         {
@@ -24,11 +20,6 @@ namespace Kantin.Service.Providers
                 throw new ItemNotFoundException();
 
             return addOnItem;
-        }
-
-        public override async Task<IEnumerable<AddOnItem>> GetAll(Query query)
-        {
-            return await Context.AddOnItems.ToListAsync();
         }
     }
 }

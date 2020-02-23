@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Kantin.Data;
-using Kantin.Data.Model;
+using Kantin.Data.Models;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +11,7 @@ namespace Kantin.Controllers
     {
         private KantinEntities _entities;
 
-        public MenuItemController(KantinEntities entities)
-        {
-            _entities = entities;
-        }
-
+        public MenuItemController(KantinEntities entities) { _entities = entities; }
 
         // GET: api/<controller>
         [HttpGet]

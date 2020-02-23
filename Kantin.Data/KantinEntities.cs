@@ -1,10 +1,10 @@
 ﻿using Kantin.Data.Extensions;
-using Kantin.Data.Model;
+using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kantin.Data
 {
-    public class KantinEntities: DbContext
+    public class KantinEntities : DbContext
     {
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
