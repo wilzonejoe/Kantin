@@ -11,7 +11,7 @@ namespace Kantin.Data
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
 
-        public KantinEntities(DbContextOptions<DbContext> options) : base(options)
+        public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
             Database.EnsureCreated();
         }
