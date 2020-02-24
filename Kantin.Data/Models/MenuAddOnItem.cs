@@ -1,4 +1,4 @@
-﻿using Kantin.Data.Models.Abstracts;
+﻿using Core.Models.Abstracts;
 
 namespace Kantin.Data.Models
 {

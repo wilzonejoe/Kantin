@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Kantin.Data.Exceptions.Models
+﻿namespace Core.Exceptions.Models
 {
     public class PropertyErrorResult
     {

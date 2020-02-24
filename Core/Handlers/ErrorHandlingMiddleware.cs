@@ -1,12 +1,12 @@
-﻿using Kantin.Data.Exceptions;
-using Kantin.Data.Exceptions.Enums;
+﻿using Core.Exceptions;
+using Core.Exceptions.Enums;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Kantin.Service.Exceptions
+namespace Core.Handlers
 {
     public class ErrorHandlingMiddleware
     {

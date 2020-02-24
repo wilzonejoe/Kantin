@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Kantin.Data.Models.Abstracts
+namespace Core.Models.Abstracts
 {
     public abstract class BaseEntity
     {

@@ -1,28 +1,29 @@
-﻿using Kantin.Data;
-using Kantin.Data.Models.Abstracts;
-using Kantin.Data.Exceptions;
-using Kantin.Service.Interface;
-using Kantin.Service.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using Core.Exceptions;
+using Core.Interface;
+using Core.Model;
+using Core.Models.Abstracts;
+using Microsoft.EntityFrameworkCore;
 
-namespace Kantin.Service.Providers
+namespace Core.Providers
 {
-    public abstract class GenericProvider<T> : IService<T>, IDisposable
+    public abstract class GenericProvider<T,R> : IService<T>, IDisposable
         where T : BaseEntity
+        where R : DbContext
     {
-        protected KantinEntities Context { get; private set; }
+        protected R Context { get; private set; }
 
-        public GenericProvider(KantinEntities context)
+        public GenericProvider(R context)
         {
             Context = context;
         }
 
         public virtual async Task<IEnumerable<T>> GetAll(Query query)
         {
-            return await Task<T>.Run(() => Context.Set<T>().AsQueryable().ToList());
+            return await Task.Run(() => Context.Set<T>().AsQueryable().ToList());
         }
 
         public virtual async Task<T> Get(int id)

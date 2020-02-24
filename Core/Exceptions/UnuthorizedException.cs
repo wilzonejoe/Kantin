@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kantin.Data.Exceptions
+namespace Core.Exceptions
 {
     class UnuthorizedException : Exception { }
 }

@@ -1,10 +1,10 @@
-﻿using Kantin.Data.Exceptions;
-using Kantin.Data.Models.Intefaces;
+﻿using Core.Exceptions;
+using Core.Models.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace Kantin.Data.Models.Abstracts
+namespace Core.Models.Abstracts
 {
     public abstract class ValidationEntity : BaseEntity, IValidationObject
     {

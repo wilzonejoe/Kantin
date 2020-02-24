@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kantin.Service.Model
+namespace Core.Model
 {
     public class Query
     {

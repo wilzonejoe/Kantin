@@ -1,4 +1,4 @@
-﻿namespace Kantin.Data.Exceptions.Enums
+﻿namespace Core.Exceptions.Enums
 {
     public enum BadRequestType
     {

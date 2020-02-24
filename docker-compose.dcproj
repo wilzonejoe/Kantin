@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>3a98f049-1d01-4502-92d5-42cbd6c39448</ProjectGuid>
+    <ProjectGuid>9748e824-a81d-45ae-8ed3-ea49f8ae1e1d</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/api/menuItem</DockerServiceUrl>
     <DockerServiceName>kantin</DockerServiceName>

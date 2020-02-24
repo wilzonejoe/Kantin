@@ -1,4 +1,5 @@
-﻿using Kantin.Data.Extensions;
+﻿using Core;
+using Kantin.Data.Extensions;
 using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace Kantin.Data
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
 
-        public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
+        public KantinEntities(DbContextOptions<DbContext> options) : base(options)
         {
             Database.EnsureCreated();
         }

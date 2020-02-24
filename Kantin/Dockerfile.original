@@ -6,8 +6,6 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["Kantin/Kantin.csproj", "Kantin/"]
-COPY ["Kantin.Data/Kantin.Data.csproj", "Kantin.Data/"]
-COPY ["Kantin.Service/Kantin.Service.csproj", "Kantin.Service/"]
 RUN dotnet restore "Kantin/Kantin.csproj"
 COPY . .
 WORKDIR "/src/Kantin"

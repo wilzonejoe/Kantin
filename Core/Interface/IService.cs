@@ -1,8 +1,8 @@
-﻿using Kantin.Service.Model;
+﻿using Core.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Kantin.Service.Interface
+namespace Core.Interface
 {
     public interface IService<T> where T : class
     {
