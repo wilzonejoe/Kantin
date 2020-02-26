@@ -1,11 +1,14 @@
+using Autofac;
 using Core.Handlers;
 using Kantin.Data;
+using Kantin.Handler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 
 namespace Kantin
@@ -28,6 +31,9 @@ namespace Kantin
             // Add framework services.
             var connectionString = Configuration.GetConnectionString("SqlConnection");
             services.AddDbContext<KantinEntities>(options => options.UseSqlServer(connectionString));
+
+            // Add Swagger 
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kantin API", Version = "v1" }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,14 +42,24 @@ namespace Kantin
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
+            ConfigureSwaggerApp(app);
+
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
+        }
+
+        private void ConfigureSwaggerApp(IApplicationBuilder app)
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kantin API V1"));
+        }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule<AutoFacModule>();
         }
     }
 }

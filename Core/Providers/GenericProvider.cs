@@ -82,9 +82,16 @@ namespace Core.Providers
             return item;
         }
 
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
+                Context?.Dispose();
+        }
+
         public void Dispose()
         {
-            Context?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
