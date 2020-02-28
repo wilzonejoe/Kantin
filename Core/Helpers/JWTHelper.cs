@@ -8,7 +8,13 @@ using System.Security.Claims;
 
 namespace Core.Helpers
 {
-    public class JWTHelper
+    public interface IJWTHelper
+    {
+        public string GenerateToken(JWTContainer model);
+        public IEnumerable<Claim> GetTokenClaims(string token);
+        public bool IsTokenValid(string token);
+    }
+    public class JWTHelper: IJWTHelper
     {
         private const string SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
 
