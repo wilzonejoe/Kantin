@@ -9,7 +9,7 @@ namespace Kantin.Data.Extensions
         {
             modelBuilder.Entity<MenuItem>()
                 .HasMany(m => m.MenuAddOnItems)
-                .WithOne(mad => mad.MenutItem);
+                .WithOne(mad => mad.MenuItem);
         }
     }
 }

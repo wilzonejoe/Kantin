@@ -10,6 +10,8 @@ namespace Kantin.Data
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
+        public DbSet<MenuItemOnMenu> MenuItemsOnMenu { get; set; }
+        public DbSet<Menu> Menus { get; set; }
 
         public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
@@ -25,6 +27,7 @@ namespace Kantin.Data
         {
             modelBuilder.SetMenuItemsRelations();
             modelBuilder.SetAddOnItemsRelations();
+            modelBuilder.SetMenusRelations();
         }
     }
 }
