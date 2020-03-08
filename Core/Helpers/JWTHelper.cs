@@ -21,7 +21,7 @@ namespace Core.Helpers
         public string GenerateToken(JWTContainer model)
         {
             if (model == null || model.Claims == null || !model.Claims.Any())
-                throw new UnuthorizedException("Arguments to create token are not valid.");
+                throw new UnauthorizedException("Arguments to create token are not valid.");
 
             var securityTokenDescriptor = new SecurityTokenDescriptor
             {
@@ -39,7 +39,7 @@ namespace Core.Helpers
         public IEnumerable<Claim> GetTokenClaims(string token)
         {
             if (string.IsNullOrEmpty(token))
-                throw new UnuthorizedException("Given token is null or empty.");
+                throw new UnauthorizedException("Given token is null or empty.");
 
             var tokenValidationParameters = GetTokenValidationParameters();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
@@ -51,7 +51,7 @@ namespace Core.Helpers
             }
             catch
             {
-                throw new UnuthorizedException("Given token is not valid");
+                throw new UnauthorizedException("Given token is not valid");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Core.Helpers
                     return claim.Value;
             }
 
-            throw new UnuthorizedException("Given token is incomplete or invalid");
+            throw new UnauthorizedException("Given token is incomplete or invalid");
         }
 
         public bool IsTokenValid(string token)
