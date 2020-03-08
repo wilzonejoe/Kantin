@@ -19,6 +19,7 @@ namespace Kantin.Data.Models
         public Guid OrganisationId { get; set; }
         public Organisation Organisation { get; set; }
         public virtual ICollection<MenuAddOnItem> MenuAddOnItems { get; set; }
+        public virtual ICollection<MenuItemOnMenu> MenuItemOnMenus { get; set; }
 
         public MenuItem() : base()
         {

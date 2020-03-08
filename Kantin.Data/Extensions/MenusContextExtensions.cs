@@ -9,7 +9,14 @@ namespace Kantin.Data.Extensions
         {
             modelBuilder.Entity<Menu>()
                 .HasMany(a => a.MenuItemsOnMenu)
-                .WithOne(mad => mad.Menu);
+                .WithOne(miom => miom.Menu)
+                .HasForeignKey(miom => miom.MenuId)
+                .HasConstraintName("FK_Menu_MenuItemsOnMenu")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Menu>()
+                .HasOne(m => m.Organisation)
+                .WithMany(o => o.Menus);
         }
     }
 }

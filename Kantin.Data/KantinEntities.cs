@@ -15,11 +15,11 @@ namespace Kantin.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<BaseSession> Sessions { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
+        public DbSet<Menu> Menus { get; set; }
+        public DbSet<MenuItemOnMenu> MenuItemsOnMenus { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
-        public DbSet<MenuItemOnMenu> MenuItemsOnMenu { get; set; }
-        public DbSet<Menu> Menus { get; set; }
 
         public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
