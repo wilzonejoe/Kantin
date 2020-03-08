@@ -9,7 +9,7 @@ namespace Kantin.Data.Extensions
         {
             modelBuilder.Entity<MenuItem>()
                 .HasMany(m => m.MenuAddOnItems)
-                .WithOne(mad => mad.MenutItem)
+                .WithOne(mad => mad.MenuItem)
                 .HasForeignKey(mad => mad.MenuItemId)
                 .HasConstraintName("FK_MenuItem_MenuAddOnItem")
                 .OnDelete(DeleteBehavior.Restrict);

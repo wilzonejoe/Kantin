@@ -12,7 +12,7 @@ namespace Kantin.Data.Models
         [Required]
         public Guid AddOnItemId { get; set; }
 
-        public MenuItem MenutItem { get; set; }
+        public MenuItem MenuItem { get; set; }
         public AddOnItem AddOnItem { get; set; }
 
         public MenuAddOnItem() : base() { }
