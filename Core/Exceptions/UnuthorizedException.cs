@@ -2,5 +2,8 @@
 
 namespace Core.Exceptions
 {
-    class UnuthorizedException : Exception { }
+    public class UnuthorizedException : Exception 
+    {
+        public UnuthorizedException(string message) : base(message) { }
+    }
 }

@@ -48,6 +48,10 @@ namespace Core.Handlers
                         innerError = badRequestException.ValidationResults;
 
                     break;
+                case ConflictException conflictException:
+                    code = HttpStatusCode.Conflict;
+                    innerError = conflictException.PropertyErrorResult;
+                    break;
             }
 
             var error = new { Error = innerError ?? exception.Message };

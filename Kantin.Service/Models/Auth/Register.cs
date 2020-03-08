@@ -1,20 +1,17 @@
-﻿using Core.Models.Abstracts;
+﻿using Core.Models.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace Core.Models
+namespace Kantin.Service.Models.Auth
 {
-    public abstract class BaseAccount : ValidationEntity
+    public class Register : IValidationObject
     {
         [Required]
-        [MaxLength(200)]
+        public string OrganisationName { get; set; }
+        [Required]
         public string Fullname { get; set; }
-
         [Required]
-        [MaxLength(50)]
         public string Username { get; set; }
-
         [Required]
-        [MaxLength(50)]
         public string Password { get; set; }
     }
 }

@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using AutoMapper;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Service.Attributes;
+using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +14,14 @@ namespace Kantin.Controllers
     public class MenuItemController : Controller
     {
         private KantinEntities _entities;
+        private IMapper _mapper;
 
-        public MenuItemController(KantinEntities entities) { _entities = entities; }
+        public MenuItemController(KantinEntities entities, IMapper mapper)
+        {
+            _entities = entities;
+            _mapper = mapper;
+        }
 
-        // GET: api/<controller>
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -24,9 +32,8 @@ namespace Kantin.Controllers
             }
         }
 
-        // GET api/<controller>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(Guid id)
         {
             using (var service = new MenuItemsProvider(_entities))
             {
@@ -35,33 +42,36 @@ namespace Kantin.Controllers
             }
         }
 
-        // POST api/<controller>
         [HttpPost]
+        [UserAuthorization]
         public async Task<IActionResult> Post([FromBody]MenuItem menuItem)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
-                var result = await service.CreateAsync(menuItem);
+                var result = await service.Create(menuItem);
                 return Created($"api/menuItem/{result.Id}", result);
             }
         }
 
-        // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]MenuItem menuItem)
+        [UserAuthorization]
+        public async Task<IActionResult> Put(Guid id, [FromBody]MenuItem menuItem)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
-                var result = await service.UpdateAsync(id, menuItem);
+                var result = await service.Update(id, menuItem);
                 return Ok(result);
             }
         }
 
-        // DELETE api/<controller>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [UserAuthorization]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            using (var service = new MenuItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
                 if (result)

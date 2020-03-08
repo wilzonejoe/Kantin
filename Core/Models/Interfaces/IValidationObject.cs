@@ -2,6 +2,5 @@
 {
     public interface IValidationObject
     {
-        public bool Validate();
     }
 }
