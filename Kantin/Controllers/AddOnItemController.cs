@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using AutoMapper;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Service.Attributes;
+using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +14,14 @@ namespace Kantin.Controllers
     public class AddOnItemController : Controller
     {
         private KantinEntities _entities;
+        private IMapper _mapper;
 
-        public AddOnItemController(KantinEntities entities) { _entities = entities; }
+        public AddOnItemController(KantinEntities entities, IMapper mapper) 
+        { 
+            _entities = entities;
+            _mapper = mapper;
+        }
 
-        // GET: api/<controller>
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -24,9 +32,8 @@ namespace Kantin.Controllers
             }
         }
 
-        // GET api/<controller>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(Guid id)
         {
             using (var service = new AddOnItemsProvider(_entities))
             {
@@ -35,33 +42,36 @@ namespace Kantin.Controllers
             }
         }
 
-        // POST api/<controller>
         [HttpPost]
+        [UserAuthorization]
         public async Task<IActionResult> Post([FromBody]AddOnItem addOnItem)
         {
-            using (var service = new AddOnItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
             {
-                var result = await service.CreateAsync(addOnItem);
+                var result = await service.Create(addOnItem);
                 return Created($"api/addOnItem/{result.Id}", result);
             }
         }
 
-        // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]AddOnItem addOnItem)
+        [UserAuthorization]
+        public async Task<IActionResult> Put(Guid id, [FromBody]AddOnItem addOnItem)
         {
-            using (var service = new AddOnItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
             {
-                var result = await service.UpdateAsync(id, addOnItem);
+                var result = await service.Update(id, addOnItem);
                 return Ok(result);
             }
         }
 
-        // DELETE api/<controller>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [UserAuthorization]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            using (var service = new AddOnItemsProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
                 if (result)

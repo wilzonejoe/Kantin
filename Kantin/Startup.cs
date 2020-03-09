@@ -1,7 +1,8 @@
-using Autofac;
+using AutoMapper;
 using Core.Handlers;
 using Kantin.Data;
-using Kantin.Handler;
+using Kantin.Extensions;
+using Kantin.Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using System;
 
 namespace Kantin
 {
@@ -32,6 +34,13 @@ namespace Kantin
             var connectionString = Configuration.GetConnectionString("SqlConnection");
             services.AddDbContext<KantinEntities>(options => options.UseSqlServer(connectionString));
 
+            // Add Validation services
+            services.AddTransient<ITokenAuthorizationService, TokenAuthorizationService>();
+            services.AddJWTAuthentication();
+
+            // Add AutoMapper
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             // Add Swagger 
             services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kantin API", Version = "v1" }));
         }
@@ -47,6 +56,7 @@ namespace Kantin
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
@@ -55,11 +65,6 @@ namespace Kantin
         {
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kantin API V1"));
-        }
-
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            builder.RegisterModule<AutoFacModule>();
         }
     }
 }

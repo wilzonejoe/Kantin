@@ -1,4 +1,5 @@
-﻿using Core.Models.Auth;
+﻿using Core.Exceptions;
+using Core.Models.Auth;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -8,20 +9,19 @@ using System.Security.Claims;
 
 namespace Core.Helpers
 {
-    public interface IJWTHelper
+    public class JWTHelper
     {
-        public string GenerateToken(JWTContainer model);
-        public IEnumerable<Claim> GetTokenClaims(string token);
-        public bool IsTokenValid(string token);
-    }
-    public class JWTHelper: IJWTHelper
-    {
-        private const string SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
+        public static readonly string SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
+
+        private static JWTHelper _instance;
+        public static JWTHelper Instance => _instance ?? (_instance = new JWTHelper());
+
+        private JWTHelper() { }
 
         public string GenerateToken(JWTContainer model)
         {
             if (model == null || model.Claims == null || !model.Claims.Any())
-                throw new UnauthorizedAccessException("Arguments to create token are not valid.");
+                throw new UnauthorizedException("Arguments to create token are not valid.");
 
             var securityTokenDescriptor = new SecurityTokenDescriptor
             {
@@ -39,7 +39,7 @@ namespace Core.Helpers
         public IEnumerable<Claim> GetTokenClaims(string token)
         {
             if (string.IsNullOrEmpty(token))
-                throw new UnauthorizedAccessException("Given token is null or empty.");
+                throw new UnauthorizedException("Given token is null or empty.");
 
             var tokenValidationParameters = GetTokenValidationParameters();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
@@ -51,8 +51,21 @@ namespace Core.Helpers
             }
             catch
             {
-                throw new UnauthorizedAccessException("Given token is not valid");
+                throw new UnauthorizedException("Given token is not valid");
             }
+        }
+
+        public string GetValueFromClaims(IEnumerable<Claim> claims, string key)
+        {
+            if (claims != null && claims.Any())
+            {
+                var claim = claims.FirstOrDefault(c => c.Type == key);
+
+                if (claim != null)
+                    return claim.Value;
+            }
+
+            throw new UnauthorizedException("Given token is incomplete or invalid");
         }
 
         public bool IsTokenValid(string token)
@@ -68,7 +81,7 @@ namespace Core.Helpers
             }
         }
 
-        private SecurityKey GetSymmetricSecurityKey()
+        public SecurityKey GetSymmetricSecurityKey()
         {
             return new SymmetricSecurityKey(Convert.FromBase64String(SecretKey));
         }

@@ -1,7 +1,10 @@
 ﻿using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Service.Attributes;
+using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace Kantin.Controllers
@@ -13,7 +16,7 @@ namespace Kantin.Controllers
 
         public MenuController(KantinEntities entities) { _entities = entities; }
 
-        // GET: api/<controller>
+
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -24,9 +27,8 @@ namespace Kantin.Controllers
             }
         }
 
-        // GET api/<controller>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(Guid id)
         {
             using (var service = new MenuProvider(_entities))
             {
@@ -35,33 +37,36 @@ namespace Kantin.Controllers
             }
         }
 
-        // POST api/<controller>
         [HttpPost]
+        [UserAuthorization]
         public async Task<IActionResult> Post([FromBody]Menu menu)
         {
-            using (var service = new MenuProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuProvider(_entities, accountIdentity))
             {
-                var result = await service.CreateAsync(menu);
+                var result = await service.Create(menu);
                 return Created($"api/menu/{result.Id}", result);
             }
         }
 
-        // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]Menu menu)
+        [UserAuthorization]
+        public async Task<IActionResult> Put(Guid id, [FromBody]Menu menu)
         {
-            using (var service = new MenuProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuProvider(_entities, accountIdentity))
             {
-                var result = await service.UpdateAsync(id, menu);
+                var result = await service.Update(id, menu);
                 return Ok(result);
             }
         }
 
-        // DELETE api/<controller>/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [UserAuthorization]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            using (var service = new MenuProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new MenuProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
                 if (result)
