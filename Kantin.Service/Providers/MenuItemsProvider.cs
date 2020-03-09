@@ -1,5 +1,4 @@
-﻿using Core.Exceptions;
-using Core.Providers;
+﻿using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Service.Models.Auth;
@@ -22,6 +21,7 @@ namespace Kantin.Service.Providers
         {
             var menuItem = await Context.MenuItems
                 .Include(m => m.MenuAddOnItems)
+                .ThenInclude(m => m.AddOnItem)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (menuItem == null)

@@ -1,4 +1,5 @@
 ﻿using Core.Models.Abstracts;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,7 +19,11 @@ namespace Kantin.Data.Models
         public double Discount { get; set; }
         public bool Available { get; set; }
         public Guid OrganisationId { get; set; }
+
+        [JsonIgnore]
         public Organisation Organisation { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<MenuAddOnItem> MenuAddOnItems { get; set; }
 
         public AddOnItem() : base()

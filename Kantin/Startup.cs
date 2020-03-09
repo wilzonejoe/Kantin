@@ -2,6 +2,7 @@ using AutoMapper;
 using Core.Handlers;
 using Kantin.Data;
 using Kantin.Extensions;
+using Kantin.Handler;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,7 +29,11 @@ namespace Kantin
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+                .AddNewtonsoftJson(opt => {
+                    opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    opt.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    opt.SerializerSettings.ContractResolver = new JsonContractResolver();
+                });
 
             // Add framework services.
             var connectionString = Configuration.GetConnectionString("SqlConnection");

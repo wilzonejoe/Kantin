@@ -52,6 +52,11 @@ namespace Core.Handlers
                     code = HttpStatusCode.Conflict;
                     innerError = conflictException.PropertyErrorResult;
                     break;
+                default:
+#if DEBUG
+                    innerError = exception.InnerException;
+#endif
+                    break;
             }
 
             var error = new { Error = innerError ?? exception.Message };

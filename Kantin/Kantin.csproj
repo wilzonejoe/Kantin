@@ -21,5 +21,10 @@
     <ProjectReference Include="..\Kantin.Service\Kantin.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Request\" />
+    <Folder Include="Models\Response\" />
+  </ItemGroup>
+
 
 </Project>

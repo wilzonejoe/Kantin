@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Models.Common;
 using Kantin.Service.Attributes;
 using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
@@ -38,17 +39,19 @@ namespace Kantin.Controllers
             using (var service = new MenuItemsProvider(_entities))
             {
                 var result = await service.Get(id);
-                return Ok(result);
+                var response = _mapper.Map<EditableMenuItem>(result);
+                return Ok(response);
             }
         }
 
         [HttpPost]
         [UserAuthorization]
-        public async Task<IActionResult> Post([FromBody]MenuItem menuItem)
+        public async Task<IActionResult> Post([FromBody]EditableMenuItem editableMenuItem)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
             using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
+                var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
                 var result = await service.Create(menuItem);
                 return Created($"api/menuItem/{result.Id}", result);
             }

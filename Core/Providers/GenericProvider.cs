@@ -11,7 +11,7 @@ using Core.Helpers;
 
 namespace Core.Providers
 {
-    public abstract class GenericProvider<T,R> : IService<T>, IDisposable
+    public abstract class GenericProvider<T, R> : IService<T>, IDisposable
         where T : BaseEntity
         where R : DbContext
     {
@@ -22,6 +22,7 @@ namespace Core.Providers
             Context = context;
         }
 
+        #region Basic CRUD
         public virtual async Task<IEnumerable<T>> GetAll(Query query)
         {
             return await Task.Run(() => Context.Set<T>().AsQueryable().ToList());
@@ -35,17 +36,27 @@ namespace Core.Providers
         public virtual async Task<T> Create(T entity)
         {
             ValidateEntity(entity);
-            entity.Id = Guid.NewGuid();
+            BeforeCreate(entity);
+
+            if(entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
+
             var result = await Context.AddAsync(entity);
             await Context.SaveChangesAsync();
+
+            AfterCreate(entity);
             return (T)result.Entity;
         }
 
         public virtual async Task<bool> Delete(Guid id)
         {
             var item = await GetItem(id);
+            BeforeDelete(item);
+
             var result = Context.Remove(item);
             await Context.SaveChangesAsync();
+
+            AfterDelete(item);
             return result != null;
         }
 
@@ -53,11 +64,17 @@ namespace Core.Providers
         {
             var item = await ProcessEntityBeforeUpdate(id, entity);
             ValidateEntity(item);
+            BeforeUpdate(item);
+
             Context.Entry(item).CurrentValues.SetValues(entity);
             await Context.SaveChangesAsync();
+
+            AfterUpdate(item);
             return await GetItem(id);
         }
+        #endregion
 
+        #region handlers
         protected virtual async Task<T> GetItem(Guid id)
         {
             var item = await Context.FindAsync(typeof(T), id);
@@ -101,7 +118,21 @@ namespace Core.Providers
 
             return item;
         }
+        #endregion
 
+        #region before action handlers
+        protected void BeforeCreate(T entity) { }
+        protected void BeforeUpdate(T entity) { }
+        protected void BeforeDelete(T entity) { }
+        #endregion
+
+        #region after action handlers
+        protected void AfterCreate(T entity) { }
+        protected void AfterUpdate(T entity) { }
+        protected void AfterDelete(T entity) { }
+        #endregion
+
+        #region Dispose
         protected virtual void Dispose(bool isDisposing)
         {
             if (isDisposing)
@@ -113,5 +144,6 @@ namespace Core.Providers
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
