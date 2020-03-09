@@ -11,10 +11,7 @@ namespace Kantin.Data.Extensions
         public static void SetTagGroupsRelation(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TagGroup>()
-                .HasKey(t => t.Title);
-
-            modelBuilder.Entity<TagGroup>()
-                .HasMany(o => o.TagValues);
+                .HasMany(o => o.TagValues).WithOne();
         }
     }
 }

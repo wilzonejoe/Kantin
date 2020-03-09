@@ -9,7 +9,7 @@ namespace Kantin.Data.Models.Tag
 {
     public class TagGroup : ValidationEntity
     {
-        [Key]
+        [Required]
         [MaxLength(50)]
         public string Title { get; set; }
 
