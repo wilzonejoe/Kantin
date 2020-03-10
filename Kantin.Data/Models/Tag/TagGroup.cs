@@ -14,5 +14,10 @@ namespace Kantin.Data.Models.Tag
         public string Title { get; set; }
 
         public virtual ICollection<TagValue> TagValues { get; set; }
+
+        public TagGroup() : base()
+        {
+            TagValues = new List<TagValue>();
+        }
     }
 }
