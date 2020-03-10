@@ -16,7 +16,6 @@ namespace Kantin.Data.Models.Tag
         [Key]
         [MaxLength(50)]
         public string Title { get; set; }
-        [ForeignKey("TagGroup")]
         public Guid TagGroupId { get; set; }
 
         public TagGroup TagGroup { get; set; }

@@ -15,9 +15,11 @@ namespace Kantin.Data.Extensions
                 .HasKey(t => new { t.ItemId, t.ItemType, t.Title });
 
             modelBuilder.Entity<TagValue>()
-                .HasOne(o => o.TagGroup)
-                .WithMany()
-                .HasForeignKey(t => t.TagGroupId);
+                .HasOne(s => s.TagGroup)
+                .WithMany(g => g.TagValues)
+                .HasForeignKey(s => s.TagGroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
         }
     }
 }

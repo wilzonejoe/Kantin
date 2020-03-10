@@ -30,11 +30,12 @@ namespace Kantin.Service.Providers
         public override async Task<TagGroup> Update(Guid id, TagGroup entity)
         {
             ValidateEntity(entity);
+            var newEntry = await Create(entity);
             await Delete(id);
-            return await Create(entity);
+            return newEntry;
         }
-
-        public virtual async Task<bool> Delete(Guid id)
+        
+        public override async Task<bool> Delete(Guid id)
         {
             var item = await Get(id);
             var result = Context.Remove(item);
