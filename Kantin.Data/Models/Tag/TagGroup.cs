@@ -12,7 +12,8 @@ namespace Kantin.Data.Models.Tag
         [Required]
         [MaxLength(50)]
         public string Title { get; set; }
-
+        public Guid OrganisationId { get; set; }
+        public Organisation Organisation { get; set; }
         public virtual ICollection<TagValue> TagValues { get; set; }
 
         public TagGroup() : base()

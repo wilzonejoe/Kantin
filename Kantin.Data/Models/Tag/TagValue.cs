@@ -19,7 +19,8 @@ namespace Kantin.Data.Models.Tag
         public Guid TagGroupId { get; set; }
 
         public TagGroup TagGroup { get; set; }
-
+        public Guid OrganisationId { get; set; }
+        public Organisation Organisation { get; set; }
         public string Subtitle { get; set; }
     }
 }

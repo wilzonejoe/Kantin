@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kantin.Data;
 using Kantin.Data.Models.Tag;
+using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +43,8 @@ namespace Kantin.Controllers.Tag
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]TagGroup tags)
         {
-            using (var service = new TagGroupProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Create(tags);
                 return Created($"api/tags/{result.Id}", result);
@@ -53,7 +55,8 @@ namespace Kantin.Controllers.Tag
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(Guid id, [FromBody]TagGroup tagGroup)
         {
-            using (var service = new TagGroupProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Update(id, tagGroup);
                 return Ok(result);
@@ -64,7 +67,8 @@ namespace Kantin.Controllers.Tag
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            using (var service = new TagGroupProvider(_entities))
+            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
                 if (result)

@@ -18,6 +18,10 @@ namespace Kantin.Data.Extensions
 
             modelBuilder.Entity<TagGroup>()
                 .HasMany(o => o.TagValues).WithOne();
+
+            modelBuilder.Entity<TagGroup>()
+                .HasOne(m => m.Organisation)
+                .WithMany(o => o.TagGroups);
         }
     }
 }

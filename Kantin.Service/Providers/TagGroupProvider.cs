@@ -6,14 +6,21 @@ using Core.Exceptions;
 using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models.Tag;
+using Kantin.Service.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kantin.Service.Providers
 {
     public class TagGroupProvider : GenericProvider<TagGroup, KantinEntities>
     {
+        public AccountIdentity AccountIdentity { get; private set; }
         public TagGroupProvider(KantinEntities context) : base(context)
         {
+        }
+
+        public TagGroupProvider(KantinEntities context, AccountIdentity accountIdentity) : base(context)
+        {
+            AccountIdentity = accountIdentity;
         }
 
         public override async Task<TagGroup> Get(Guid id)
@@ -27,20 +34,34 @@ namespace Kantin.Service.Providers
             return item;
         }
 
+        public override Task<TagGroup> Create(TagGroup entity)
+        {
+            entity.OrganisationId = AccountIdentity.OrganisationId;
+            return base.Create(entity);
+        }
+
         public override async Task<TagGroup> Update(Guid id, TagGroup entity)
         {
+            entity.OrganisationId = AccountIdentity.OrganisationId;
             ValidateEntity(entity);
+            var deleteItem = await GetById(id);
+            if (deleteItem == null)
+            {
+                HandleItemNotFound(id);
+                return null;
+            }
             var newEntry = await Create(entity);
-            await Delete(id);
+            Context.Remove(deleteItem);
+            await Context.SaveChangesAsync();
             return newEntry;
         }
-        
-        public override async Task<bool> Delete(Guid id)
+
+        private async Task<TagGroup> GetById(Guid id)
         {
-            var item = await Get(id);
-            var result = Context.Remove(item);
-            await Context.SaveChangesAsync();
-            return result != null;
+            var item = await Context.TagGroups
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            return item;
         }
     }
 }

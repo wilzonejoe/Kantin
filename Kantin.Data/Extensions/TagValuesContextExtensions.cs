@@ -12,14 +12,21 @@ namespace Kantin.Data.Extensions
         public static void SetTagValuesRelation(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TagValue>()
-                .HasKey(t => new { t.ItemId, t.ItemType, t.Title });
+                .HasKey(t => t.Id);
+
+            modelBuilder.Entity<TagValue>()
+                .HasAlternateKey(t => new { t.ItemId, t.ItemType, t.Title });
 
             modelBuilder.Entity<TagValue>()
                 .HasOne(s => s.TagGroup)
                 .WithMany(g => g.TagValues)
                 .HasForeignKey(s => s.TagGroupId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
+            modelBuilder.Entity<TagValue>()
+                .HasOne(m => m.Organisation)
+                .WithMany(o => o.TagValues);
+
         }
     }
 }
