@@ -43,24 +43,27 @@ namespace Kantin.Service.Providers
 
         protected override Task BeforeDelete(MenuItem entity)
         {
-            var existedMenuAddOnItems = Context.MenuAddOnItems.Where(mad => mad.MenuItemId == entity.Id);
-            Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
-
-            var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == entity.Id);
-            Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
-
+            ClearMenuAddOnItems(entity.Id);
+            ClearMenuItemsOnMenus(entity.Id);
             return base.BeforeDelete(entity);
         }
 
+        private void ClearMenuAddOnItems(Guid menuItemId)
+        {
+            var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == menuItemId);
+            Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
+        }
+        private void ClearMenuItemsOnMenus(Guid menuItemId)
+        {
+            var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == menuItemId);
+            Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
+        }
         private async Task ProcessMenuAddOnItem(MenuItem item, bool isNew)
         {
             var menuAddOnItems = item.MenuAddOnItems;
 
             if (!isNew)
-            {
-                var existedMenuAddOnItems = Context.MenuAddOnItems.Where(mad => mad.MenuItemId == item.Id);
-                Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
-            }
+                ClearMenuAddOnItems(item.Id);
 
             if (menuAddOnItems != null && menuAddOnItems.Any())
             {
@@ -90,10 +93,7 @@ namespace Kantin.Service.Providers
             var menuItemOnMenus = item.MenuItemOnMenus;
 
             if (!isNew)
-            {
-                var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == item.Id);
-                Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
-            }
+                ClearMenuItemsOnMenus(item.Id);
 
             if (menuItemOnMenus != null && menuItemOnMenus.Any())
             {
