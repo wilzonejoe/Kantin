@@ -47,7 +47,11 @@ namespace Kantin
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // Add Swagger 
-            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kantin API", Version = "v1" }));
+            services.AddSwaggerGen(c => 
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kantin API", Version = "v1" });
+                c.SchemaFilter<SwaggerFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

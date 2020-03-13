@@ -8,6 +8,9 @@ using Core.Model;
 using Core.Models.Abstracts;
 using Microsoft.EntityFrameworkCore;
 using Core.Helpers;
+using Core.Models.Auth;
+using Core.Models.Interfaces;
+using Core.Extensions;
 
 namespace Core.Providers
 {
@@ -15,11 +18,18 @@ namespace Core.Providers
         where T : BaseEntity
         where R : DbContext
     {
+        protected AccountIdentity AccountIdentity { get; private set; }
         protected R Context { get; private set; }
 
         public GenericProvider(R context)
         {
             Context = context;
+        }
+
+        public GenericProvider(R context, AccountIdentity accountIdentity)
+        {
+            Context = context;
+            AccountIdentity = accountIdentity;
         }
 
         #region Basic CRUD
@@ -30,33 +40,37 @@ namespace Core.Providers
 
         public virtual async Task<T> Get(Guid id)
         {
-            return await GetItem(id);
+            return await GetItem(id, false);
         }
 
         public virtual async Task<T> Create(T entity)
         {
             ValidateEntity(entity);
-            BeforeCreate(entity);
 
             if(entity.Id == Guid.Empty)
                 entity.Id = Guid.NewGuid();
 
+            if (entity is IOrganisationModel organisationModel)
+                organisationModel.SetOrganisationId(AccountIdentity?.OrganisationId);
+
+            await BeforeCreate(entity);
+
             var result = await Context.AddAsync(entity);
             await Context.SaveChangesAsync();
 
-            AfterCreate(entity);
+            await AfterCreate(entity);
             return (T)result.Entity;
         }
 
         public virtual async Task<bool> Delete(Guid id)
         {
             var item = await GetItem(id);
-            BeforeDelete(item);
+            await BeforeDelete(item);
 
             var result = Context.Remove(item);
             await Context.SaveChangesAsync();
 
-            AfterDelete(item);
+            await AfterDelete(item);
             return result != null;
         }
 
@@ -64,22 +78,29 @@ namespace Core.Providers
         {
             var item = await ProcessEntityBeforeUpdate(id, entity);
             ValidateEntity(item);
-            BeforeUpdate(item);
+            await BeforeUpdate(item);
+
+            if (entity is IOrganisationModel organisationModel)
+                organisationModel.SetOrganisationId(AccountIdentity?.OrganisationId);
 
             Context.Entry(item).CurrentValues.SetValues(entity);
             await Context.SaveChangesAsync();
 
-            AfterUpdate(item);
+            await AfterUpdate(item);
             return await GetItem(id);
         }
         #endregion
 
         #region handlers
-        protected virtual async Task<T> GetItem(Guid id)
+        protected virtual async Task<T> GetItem(Guid id, bool checkOrganisation = true)
         {
             var item = await Context.FindAsync(typeof(T), id);
 
             if (item == null)
+                HandleItemNotFound(id);
+
+            if (checkOrganisation && item is IOrganisationModel model && 
+                model.OrganisationId != AccountIdentity.OrganisationId)
                 HandleItemNotFound(id);
 
             return (T)item;
@@ -121,15 +142,19 @@ namespace Core.Providers
         #endregion
 
         #region before action handlers
-        protected void BeforeCreate(T entity) { }
-        protected void BeforeUpdate(T entity) { }
-        protected void BeforeDelete(T entity) { }
+        #pragma warning disable 1998
+        protected virtual async Task BeforeCreate(T entity) { }
+        protected virtual async Task BeforeUpdate(T entity) { }
+        protected virtual async Task BeforeDelete(T entity) { }
+        #pragma warning restore 1998
         #endregion
 
         #region after action handlers
-        protected void AfterCreate(T entity) { }
-        protected void AfterUpdate(T entity) { }
-        protected void AfterDelete(T entity) { }
+        #pragma warning disable 1998
+        protected virtual async Task AfterCreate(T entity) { }
+        protected virtual async Task AfterUpdate(T entity) { }
+        protected virtual async Task AfterDelete(T entity) { }
+        #pragma warning restore 1998
         #endregion
 
         #region Dispose

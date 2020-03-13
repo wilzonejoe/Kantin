@@ -14,16 +14,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.1.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Kantin.Data\Kantin.Data.csproj" />
     <ProjectReference Include="..\Kantin.Service\Kantin.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Request\" />
-    <Folder Include="Models\Response\" />
+    <Folder Include="Models\Common\" />
   </ItemGroup>
 
 

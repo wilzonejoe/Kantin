@@ -1,4 +1,5 @@
 ﻿using Core.Models.Abstracts;
+using Core.Models.Interfaces;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kantin.Data.Models
 {
-    public class MenuItem : ValidationEntity
+    public class MenuItem : ValidationEntity, IOrganisationModel
     {
         [Required]
         [MaxLength(50)]

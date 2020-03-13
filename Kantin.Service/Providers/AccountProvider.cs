@@ -1,5 +1,6 @@
 ﻿using Core.Exceptions;
 using Core.Exceptions.Models;
+using Core.Extensions;
 using Core.Helpers;
 using Core.Providers;
 using Kantin.Data;
@@ -62,8 +63,9 @@ namespace Kantin.Service.Providers
 
                 return await ProcessSession(serviceProvider, createdAccount);
             }
-            catch (Exception e)
+            catch
             {
+                Context.Rollback();
                 return GenerateLoginResult(null);
             }
         }

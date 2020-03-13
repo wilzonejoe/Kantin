@@ -5,12 +5,12 @@ using System.Security.Claims;
 
 namespace Core.Models.Auth
 {
-    public class UserIdentity
+    public class AccountIdentity
     {
-        public Guid OrganisationId { get; set; }
-        public Guid AccountId { get; set; }
+        public Guid? OrganisationId { get; set; }
+        public Guid? AccountId { get; set; }
 
-        public UserIdentity(IEnumerable<Claim> claims)
+        public AccountIdentity(IEnumerable<Claim> claims)
         {
             Init(claims);
         }
@@ -18,10 +18,16 @@ namespace Core.Models.Auth
         private void Init(IEnumerable<Claim> claims)
         {
             var organisationIdString = JWTHelper.Instance.GetValueFromClaims(claims, nameof(OrganisationId));
-            OrganisationId = Guid.Parse(organisationIdString);
+            var isOrganisationIdParsed = Guid.TryParse(organisationIdString, out var organisationId);
 
-            var accountId = JWTHelper.Instance.GetValueFromClaims(claims, nameof(AccountId));
-            AccountId = Guid.Parse(accountId);
+            if (isOrganisationIdParsed)
+                OrganisationId = organisationId;
+
+            var accountIdString = JWTHelper.Instance.GetValueFromClaims(claims, nameof(AccountId));
+            var isAccountIdParsed = Guid.TryParse(accountIdString, out var accountId);
+
+            if (isAccountIdParsed)
+                AccountId = accountId;
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
+using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Service.Attributes;
-using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,8 +1,6 @@
 ﻿using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models;
-using Kantin.Service.Models;
-using System;
 
 namespace Kantin.Service.Providers
 {

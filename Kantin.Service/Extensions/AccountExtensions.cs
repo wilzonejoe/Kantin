@@ -1,6 +1,5 @@
 ﻿using Core.Models.Auth;
 using Kantin.Data.Models;
-using Kantin.Service.Models.Auth;
 using System.Security.Claims;
 
 namespace Kantin.Service.Extensions

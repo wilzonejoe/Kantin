@@ -1,13 +1,13 @@
 ﻿using Kantin.Data.Models;
 using System.Collections.Generic;
 
-namespace Kantin.Models.Common
+namespace Kantin.Models.Response
 {
-    public class EditableMenuItem : MenuItem
+    public class EditableMenuItemResponse : MenuItem
     {
         public List<AddOnItem> AddOnItems { get; set; }
 
-        public EditableMenuItem() : base()
+        public EditableMenuItemResponse() : base()
         {
             AddOnItems = new List<AddOnItem>();
         }

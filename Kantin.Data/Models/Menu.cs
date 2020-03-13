@@ -1,11 +1,12 @@
 ﻿using Core.Models.Abstracts;
+using Core.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Kantin.Data.Models
 {
-    public class Menu : ValidationEntity
+    public class Menu : ValidationEntity, IOrganisationModel
     {
         [Required]
         public string Title { get; set; }
