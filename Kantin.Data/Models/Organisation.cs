@@ -1,6 +1,5 @@
 ﻿using Core.Models.Auth;
 using System.Collections.Generic;
-using Kantin.Data.Models.Tag;
 
 namespace Kantin.Data.Models
 {

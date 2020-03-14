@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Core.Exceptions.Models;
 using Kantin.Data;
 using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Kantin.Controllers
@@ -20,6 +22,11 @@ namespace Kantin.Controllers
         }
 
         [HttpPost("[action]")]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(LoginResult))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Login([FromBody]Login login)
         {
             using (var userProvider = new AccountProvider(_entities))
@@ -34,6 +41,11 @@ namespace Kantin.Controllers
         }
 
         [HttpPost("[action]")]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(LoginResult))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Register([FromBody]Register register)
         {
             using (var userProvider = new AccountProvider(_entities))

@@ -1,11 +1,11 @@
 ﻿using Core.Models.Abstracts;
+using Core.Models.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Models.Auth
 {
-    public class BaseAccount : ValidationEntity
+    public class BaseAccount : ValidationEntity, IOrganisationModel
     {
         [Required]
         [MaxLength(200)]

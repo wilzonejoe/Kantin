@@ -1,56 +1,43 @@
-﻿using Core.Providers;
+﻿using Core.Models.Auth;
+using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models;
-using Kantin.Service.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kantin.Service.Providers
 {
     public class AddOnItemsProvider : GenericProvider<AddOnItem, KantinEntities>
     {
-        public AccountIdentity AccountIdentity { get; private set; }
         public AddOnItemsProvider(KantinEntities context) : base(context) { }
-        public AddOnItemsProvider(KantinEntities context, AccountIdentity accountIdentity) : base(context)
-        {
-            AccountIdentity = accountIdentity;
-        }
+        public AddOnItemsProvider(KantinEntities context, AccountIdentity accountIdentity) : base(context, accountIdentity) { }
 
+        #region CRUD
         public override async Task<AddOnItem> Get(Guid id)
         {
             var addOnItem = await Context.AddOnItems
-                .Include(m => m.MenuAddOnItems)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(a => a.MenuAddOnItems)
+                .ThenInclude(m => m.MenuItem)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (addOnItem == null)
                 HandleItemNotFound(id);
 
             return addOnItem;
         }
+        #endregion
 
-        public override Task<AddOnItem> Create(AddOnItem entity)
+        protected override Task BeforeDelete(AddOnItem entity)
         {
-            entity.OrganisationId = AccountIdentity.OrganisationId;
-            return base.Create(entity);
+            ClearMenuAddOnItems(entity.Id);
+            return base.BeforeDelete(entity);
         }
-
-        public override Task<AddOnItem> Update(Guid id, AddOnItem entity)
+        private void ClearMenuAddOnItems(Guid addOnItemId)
         {
-            entity.OrganisationId = AccountIdentity.OrganisationId;
-            return base.Update(id, entity);
-        }
-
-        protected override async Task<AddOnItem> GetItem(Guid id)
-        {
-            var addOnItem = await base.GetItem(id);
-            if (AccountIdentity == null)
-                return addOnItem;
-
-            if (addOnItem.OrganisationId != AccountIdentity.OrganisationId)
-                HandleItemNotFound(id);
-
-            return addOnItem;
+            var existedMenuAddOnItems = Context.MenuAddOnItems.Where(mad => mad.AddOnItemId == addOnItemId);
+            Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
         }
     }
 }

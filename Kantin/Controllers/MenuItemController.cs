@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Core.Exceptions.Models;
+using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Models.Request;
+using Kantin.Models.Response;
 using Kantin.Service.Attributes;
-using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +28,10 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<MenuItem>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get()
         {
             using (var service = new MenuItemsProvider(_entities))
@@ -33,41 +42,67 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EditableMenuItemResponse))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
             using (var service = new MenuItemsProvider(_entities))
             {
                 var result = await service.Get(id);
-                return Ok(result);
+                var response = _mapper.Map<EditableMenuItemResponse>(result);
+                return Ok(response);
             }
         }
 
         [HttpPost]
         [UserAuthorization]
-        public async Task<IActionResult> Post([FromBody]MenuItem menuItem)
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(EditableMenuItemResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
+        public async Task<IActionResult> Post([FromBody]EditableMenuItemRequest editableMenuItem)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
             using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
+                var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
                 var result = await service.Create(menuItem);
-                return Created($"api/menuItem/{result.Id}", result);
+                var response = _mapper.Map<EditableMenuItemResponse>(result);
+                return Created($"api/menuItem/{result.Id}", response);
             }
         }
 
         [HttpPut("{id}")]
         [UserAuthorization]
-        public async Task<IActionResult> Put(Guid id, [FromBody]MenuItem menuItem)
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EditableMenuItemResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
+        public async Task<IActionResult> Put(Guid id, [FromBody]EditableMenuItemRequest editableMenuItem)
         {
+            var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
             using (var service = new MenuItemsProvider(_entities, accountIdentity))
             {
                 var result = await service.Update(id, menuItem);
-                return Ok(result);
+                var response = _mapper.Map<EditableMenuItemResponse>(result);
+                return Ok(response);
             }
         }
 
         [HttpDelete("{id}")]
         [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);

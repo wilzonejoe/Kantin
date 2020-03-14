@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Kantin.Data.Models.Tag;
+﻿using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kantin.Data.Extensions

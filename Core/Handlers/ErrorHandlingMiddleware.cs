@@ -1,5 +1,6 @@
 ﻿using Core.Exceptions;
 using Core.Exceptions.Enums;
+using Core.Exceptions.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -52,9 +53,14 @@ namespace Core.Handlers
                     code = HttpStatusCode.Conflict;
                     innerError = conflictException.PropertyErrorResult;
                     break;
+                default:
+#if DEBUG
+                    innerError = exception.InnerException;
+#endif
+                    break;
             }
 
-            var error = new { Error = innerError ?? exception.Message };
+            var error = new ApiError { Error = innerError ?? exception.Message };
             var result = JsonConvert.SerializeObject(error);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
