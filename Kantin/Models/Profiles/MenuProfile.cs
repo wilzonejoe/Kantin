@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace Kantin.Models.Profiles
 {
-    public class MenuItemProfile : Profile
+    public class MenuProfile : Profile
     {
-        public MenuItemProfile()
+        public MenuProfile()
         {
             CreateMap<Menu, EditableMenuResponse>(MemberList.Source)
                 .ForMember(dst => dst.MenuItems, opt => opt.MapFrom(src => src.MenuItemsOnMenus.Select(m => m.MenuItem)));
