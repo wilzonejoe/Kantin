@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 using Core.Models.Abstracts;
 
-namespace Kantin.Data.Models.Tag
+namespace Kantin.Data.Models
 {
     public class TagGroup : ValidationEntity
     {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Exceptions.Models;
 using Core.Providers;
 using Kantin.Data;
-using Kantin.Data.Models.Tag;
+using Kantin.Data.Models;
 using Kantin.Service.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Exceptions.Models;
 using Core.Providers;
 using Kantin.Data;
-using Kantin.Data.Models.Tag;
+using Kantin.Data.Models;
 using Kantin.Service.Models.Auth;
-using Microsoft.EntityFrameworkCore;
 
 namespace Kantin.Service.Providers
 {
@@ -30,16 +28,11 @@ namespace Kantin.Service.Providers
             entity.OrganisationId = AccountIdentity.OrganisationId;
             ValidateEntity(entity);
             entity.Id = Guid.NewGuid();
+
             CheckExistingTagValue(entity);
+            CheckIfTargetItemIsValid(entity);
+            CheckTagGroupIdValid(entity.TagGroupId);
 
-            bool checkItemExisted = await IsItemExisted(entity);
-            bool checkValidTagGroup = await IsTagGroupIdValid(entity.TagGroupId);
-            if (!checkItemExisted)
-                throw new ItemNotFoundException("Itemtype id: " + entity.ItemId + "not found in Itemtype: " + entity.ItemType);
-
-            if (!checkValidTagGroup)
-                throw new ItemNotFoundException("TagGroup id: " + entity.ItemId + " not found");
-            
             var result = await Context.AddAsync(entity);
             await Context.SaveChangesAsync();
             return result.Entity;
@@ -51,43 +44,62 @@ namespace Kantin.Service.Providers
             return base.Update(id, entity);
         }
 
-        private async Task<bool> IsItemExisted(TagValue entity)
+        private void CheckIfTargetItemIsValid(TagValue entity)
         {
-            try
+            var isTargetItemValid = false;
+
+            switch (entity.ItemType)
             {
-                if (entity.ItemType == ItemType.MenuItem)
+                case TagItemType.Menu:
+                    isTargetItemValid = Context.Menus.Any(m => m.Id == entity.ItemId && 
+                        m.OrganisationId == AccountIdentity.OrganisationId);
+                    break;
+                case TagItemType.MenuItem:
+                    isTargetItemValid = Context.MenuItems.Any(m => m.Id == entity.ItemId && 
+                        m.OrganisationId == AccountIdentity.OrganisationId);
+                    break;
+                case TagItemType.AddOnItem:
+                    isTargetItemValid = Context.AddOnItems.Any(m => m.Id == entity.ItemId &&
+                        m.OrganisationId == AccountIdentity.OrganisationId);
+                    break;
+                default:
+                    isTargetItemValid = false;
+                    break;
+            }
+
+
+            if (isTargetItemValid)
+                return;
+
+            var propertyValidationErrors = new List<PropertyErrorResult>
+            {
+                new PropertyErrorResult
                 {
-                    var provider = new MenuItemsProvider(Context);
-                    var itemEntity = await provider.Get(entity.ItemId);
+                    FieldName = nameof(TagValue.ItemType),
+                    FieldErrors = $"{nameof(TagValue.ItemType)} ({entity.ItemType}) is not valid"
                 }
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-            return true;
+            };
+
+            throw new BadRequestException(propertyValidationErrors);
         }
 
-        private async Task<bool> IsTagGroupIdValid(Guid id)
+        private void CheckTagGroupIdValid(Guid tagGroupId)
         {
-            try
-            {
-                var provider = new TagGroupProvider(Context);
-                var itemEntity = await provider.Get(id);
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-            return true;
-        }
+            var tagGroupExisted = Context.TagGroups.Any(tg => tg.Id == tagGroupId);
 
-        private async Task<TagValue> GetById(Guid id)
-        {
-            var item = await Context.TagValues
-                .FirstOrDefaultAsync(m => m.Id == id);
+            if (tagGroupExisted)
+                return;
 
-            return item;
+            var propertyValidationErrors = new List<PropertyErrorResult>
+            {
+                new PropertyErrorResult
+                {
+                    FieldName = nameof(TagValue.TagGroupId),
+                    FieldErrors = $"{nameof(TagValue.TagGroupId)} ({tagGroupId}) is not found"
+                }
+            };
+
+            throw new BadRequestException(propertyValidationErrors);
         }
 
         private void CheckExistingTagValue(TagValue entity)

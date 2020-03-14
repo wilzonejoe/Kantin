@@ -22,6 +22,12 @@ namespace Core.Exceptions
             ValidationResults = MapValidationErrorResult(validationResult);
         }
 
+        public BadRequestException(List<PropertyErrorResult> propertyErrorResults) : base()
+        {
+            Type = BadRequestType.Validation;
+            ValidationResults = propertyErrorResults;
+        }
+
         private List<PropertyErrorResult> MapValidationErrorResult(List<ValidationResult> validationResults)
         {
             var propertyErrorResults = new List<PropertyErrorResult>();
