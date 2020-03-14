@@ -20,6 +20,8 @@ namespace Kantin.Data
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
+        public DbSet<TagValue> TagValues { get; set; }
+        public DbSet<TagGroup> TagGroups { get; set; }
 
         public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
@@ -38,6 +40,8 @@ namespace Kantin.Data
             modelBuilder.SetMenuItemsRelations();
             modelBuilder.SetAddOnItemsRelations();
             modelBuilder.SetMenusRelations();
+            modelBuilder.SetTagGroupsRelation();
+            modelBuilder.SetTagValuesRelation();
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
