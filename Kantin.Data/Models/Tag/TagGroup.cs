@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Core.Models.Abstracts;
+using Newtonsoft.Json;
 
 namespace Kantin.Data.Models
 {
@@ -11,6 +12,8 @@ namespace Kantin.Data.Models
         [MaxLength(50)]
         public string Title { get; set; }
         public Guid OrganisationId { get; set; }
+
+        [JsonIgnore]
         public Organisation Organisation { get; set; }
         public virtual ICollection<TagValue> TagValues { get; set; }
 

@@ -4,44 +4,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Exceptions.Models;
+using Core.Models.Auth;
 using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models;
-using Kantin.Service.Models.Auth;
 
 namespace Kantin.Service.Providers
 {
     public class TagValueProvider : GenericProvider<TagValue, KantinEntities>
     {
-        public AccountIdentity AccountIdentity { get; private set; }
-        public TagValueProvider(KantinEntities context) : base(context)
-        {
-        }
+        public TagValueProvider(KantinEntities context) : base(context) { }
 
-        public TagValueProvider(KantinEntities context, AccountIdentity accountIdentity) : base(context)
-        {
-            AccountIdentity = accountIdentity;
-        }
+        public TagValueProvider(KantinEntities context, AccountIdentity accountIdentity) : base(context, accountIdentity) { }
 
-        public override async Task<TagValue> Create(TagValue entity)
+        protected override Task BeforeCreate(TagValue entity)
         {
-            entity.OrganisationId = AccountIdentity.OrganisationId;
-            ValidateEntity(entity);
-            entity.Id = Guid.NewGuid();
-
             CheckExistingTagValue(entity);
             CheckIfTargetItemIsValid(entity);
             CheckTagGroupIdValid(entity.TagGroupId);
-
-            var result = await Context.AddAsync(entity);
-            await Context.SaveChangesAsync();
-            return result.Entity;
-        }
-
-        public override Task<TagValue> Update(Guid id, TagValue entity)
-        {
-            entity.OrganisationId = AccountIdentity.OrganisationId;
-            return base.Update(id, entity);
+            return base.BeforeCreate(entity);
         }
 
         private void CheckIfTargetItemIsValid(TagValue entity)
