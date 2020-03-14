@@ -50,14 +50,16 @@ namespace Kantin.Service.Providers
 
         private void ClearMenuAddOnItems(Guid menuItemId)
         {
-            var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == menuItemId);
-            Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
+            var existedMenuAddOnItems= Context.MenuAddOnItems.Where(mad => mad.MenuItemId == menuItemId);
+            Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
         }
+
         private void ClearMenuItemsOnMenus(Guid menuItemId)
         {
             var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == menuItemId);
             Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
         }
+
         private async Task ProcessMenuAddOnItem(MenuItem item, bool isNew)
         {
             var menuAddOnItems = item.MenuAddOnItems;
@@ -81,7 +83,10 @@ namespace Kantin.Service.Providers
                     var addOnItemExisted = Context.AddOnItems.Any(a => a.Id == menuAddOnItem.AddOnItemId);
 
                     if (addOnItemExisted)
-                        await Context.MenuAddOnItems.AddAsync(menuAddOnItem);
+                        continue;
+
+                    menuAddOnItem.MenuItemId = item.Id;
+                    await Context.MenuAddOnItems.AddAsync(menuAddOnItem);
                 }
 
                 item.MenuAddOnItems.Clear();
@@ -90,7 +95,7 @@ namespace Kantin.Service.Providers
 
         private async Task ProcessMenuItemOnMenus(MenuItem item, bool isNew)
         {
-            var menuItemOnMenus = item.MenuItemOnMenus;
+            var menuItemOnMenus = item.MenuItemsOnMenus;
 
             if (!isNew)
                 ClearMenuItemsOnMenus(item.Id);
@@ -111,7 +116,10 @@ namespace Kantin.Service.Providers
                     var menuExisted = Context.Menus.Any(a => a.Id == menuItemOnMenu.MenuId);
 
                     if (menuExisted)
-                        await Context.MenuItemsOnMenus.AddAsync(menuItemOnMenu);
+                        continue;
+
+                    menuItemOnMenu.MenuItemId = item.Id;
+                    await Context.MenuItemsOnMenus.AddAsync(menuItemOnMenu);
                 }
 
                 item.MenuAddOnItems.Clear();

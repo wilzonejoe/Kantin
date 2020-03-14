@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Core.Exceptions.Models;
 using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
@@ -14,15 +17,17 @@ namespace Kantin.Controllers
     public class AddOnItemController : Controller
     {
         private KantinEntities _entities;
-        private IMapper _mapper;
 
-        public AddOnItemController(KantinEntities entities, IMapper mapper) 
+        public AddOnItemController(KantinEntities entities) 
         { 
             _entities = entities;
-            _mapper = mapper;
         }
 
         [HttpGet]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<AddOnItem>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get()
         {
             using (var service = new AddOnItemsProvider(_entities))
@@ -33,6 +38,11 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(AddOnItem))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
             using (var service = new AddOnItemsProvider(_entities))
@@ -44,6 +54,11 @@ namespace Kantin.Controllers
 
         [HttpPost]
         [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(AddOnItem))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Post([FromBody]AddOnItem addOnItem)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
@@ -56,6 +71,12 @@ namespace Kantin.Controllers
 
         [HttpPut("{id}")]
         [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(AddOnItem))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Put(Guid id, [FromBody]AddOnItem addOnItem)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
@@ -68,6 +89,11 @@ namespace Kantin.Controllers
 
         [HttpDelete("{id}")]
         [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = new AccountIdentity(HttpContext.User.Claims);

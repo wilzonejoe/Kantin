@@ -4,6 +4,7 @@ using Kantin.Data;
 using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kantin.Service.Providers
@@ -27,5 +28,16 @@ namespace Kantin.Service.Providers
             return addOnItem;
         }
         #endregion
+
+        protected override Task BeforeDelete(AddOnItem entity)
+        {
+            ClearMenuAddOnItems(entity.Id);
+            return base.BeforeDelete(entity);
+        }
+        private void ClearMenuAddOnItems(Guid addOnItemId)
+        {
+            var existedMenuAddOnItems = Context.MenuAddOnItems.Where(mad => mad.AddOnItemId == addOnItemId);
+            Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
+        }
     }
 }

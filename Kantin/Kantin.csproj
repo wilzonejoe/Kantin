@@ -24,9 +24,5 @@
     <ProjectReference Include="..\Kantin.Service\Kantin.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Common\" />
-  </ItemGroup>
-
 
 </Project>
