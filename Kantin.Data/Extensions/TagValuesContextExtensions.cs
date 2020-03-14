@@ -14,8 +14,8 @@ namespace Kantin.Data.Extensions
             modelBuilder.Entity<TagValue>()
                 .HasKey(t => t.Id);
 
-            modelBuilder.Entity<TagValue>()
-                .HasAlternateKey(t => new { t.ItemId, t.ItemType, t.Title });
+            //modelBuilder.Entity<TagValue>()
+            //    .HasAlternateKey(t => new { t.ItemId, t.ItemType, t.Title });
 
             modelBuilder.Entity<TagValue>()
                 .HasOne(s => s.TagGroup)

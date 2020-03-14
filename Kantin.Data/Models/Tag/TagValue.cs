@@ -9,11 +9,8 @@ namespace Kantin.Data.Models.Tag
 {
     public class TagValue : ValidationEntity
     {
-        [Key]
         public Guid ItemId { get; set; }
-        [Key]
         public ItemType ItemType { get; set; }
-        [Key]
         [MaxLength(50)]
         public string Title { get; set; }
         public Guid TagGroupId { get; set; }

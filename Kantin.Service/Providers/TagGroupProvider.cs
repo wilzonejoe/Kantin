@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Exceptions;
+using Core.Exceptions.Models;
 using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models.Tag;
@@ -23,43 +24,43 @@ namespace Kantin.Service.Providers
             AccountIdentity = accountIdentity;
         }
 
-        public override async Task<TagGroup> Get(Guid id)
-        {
-            var item = await Context.TagGroups
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (item == null)
-                HandleItemNotFound(id);
-
-            return item;
-        }
-
-        public override Task<TagGroup> Create(TagGroup entity)
-        {
-            entity.OrganisationId = AccountIdentity.OrganisationId;
-            return base.Create(entity);
-        }
-
-        public override async Task<TagGroup> Update(Guid id, TagGroup entity)
+        public override async Task<TagGroup> Create(TagGroup entity)
         {
             entity.OrganisationId = AccountIdentity.OrganisationId;
             ValidateEntity(entity);
-            var deleteItem = await GetById(id);
-            if (deleteItem == null)
+            var item = await GetByTitle(entity.Title);
+            if (item != null)
             {
-                HandleItemNotFound(id);
-                return null;
+                throw new ConflictException(new List<PropertyErrorResult>()
+                {
+                    new PropertyErrorResult
+                    {
+                        FieldErrors = "Title",
+                        FieldName = $"The {nameof(TagGroup.Title)} with value {entity.Title} is already existed in the database"
+                    }
+                });
             }
-            var newEntry = await Create(entity);
-            Context.Remove(deleteItem);
-            await Context.SaveChangesAsync();
-            return newEntry;
+            return await base.Create(entity);
+        }
+
+        public override Task<TagGroup> Update(Guid id, TagGroup entity)
+        {
+            entity.OrganisationId = AccountIdentity.OrganisationId;
+            return base.Update(id, entity);
         }
 
         private async Task<TagGroup> GetById(Guid id)
         {
             var item = await Context.TagGroups
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            return item;
+        }
+
+        private async Task<TagGroup> GetByTitle(string Title)
+        {
+            var item = await Context.TagGroups
+                .FirstOrDefaultAsync(m => m.Title == Title);
 
             return item;
         }

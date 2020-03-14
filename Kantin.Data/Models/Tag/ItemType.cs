@@ -2,6 +2,6 @@
 {
     public enum ItemType
     {
-        MenuItem,
+        MenuItem = 1,
     }
 }

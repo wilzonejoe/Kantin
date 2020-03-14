@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Exceptions;
+using Core.Exceptions.Models;
 using Core.Providers;
 using Kantin.Data;
 using Kantin.Data.Models.Tag;
@@ -23,52 +25,30 @@ namespace Kantin.Service.Providers
             AccountIdentity = accountIdentity;
         }
 
-        public override async Task<TagValue> Get(Guid id)
-        {
-            var item = await Context.TagValues
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (item == null)
-                HandleItemNotFound(id);
-
-            return item;
-        }
-
         public override async Task<TagValue> Create(TagValue entity)
         {
             entity.OrganisationId = AccountIdentity.OrganisationId;
             ValidateEntity(entity);
             entity.Id = Guid.NewGuid();
+            CheckExistingTagValue(entity);
+
             bool checkItemExisted = await IsItemExisted(entity);
             bool checkValidTagGroup = await IsTagGroupIdValid(entity.TagGroupId);
             if (!checkItemExisted)
-            {
                 throw new ItemNotFoundException("Itemtype id: " + entity.ItemId + "not found in Itemtype: " + entity.ItemType);
-            }
 
             if (!checkValidTagGroup)
-            {
                 throw new ItemNotFoundException("TagGroup id: " + entity.ItemId + " not found");
-            }
+            
             var result = await Context.AddAsync(entity);
             await Context.SaveChangesAsync();
             return result.Entity;
         }
 
-        public override async Task<TagValue> Update(Guid id, TagValue entity)
+        public override Task<TagValue> Update(Guid id, TagValue entity)
         {
             entity.OrganisationId = AccountIdentity.OrganisationId;
-            ValidateEntity(entity);
-            var deleteItem = await GetById(id);
-            if (deleteItem == null)
-            {
-                HandleItemNotFound(id);
-                return null;
-            }
-            var newEntry = await Create(entity);
-            Context.Remove(deleteItem);
-            await Context.SaveChangesAsync();
-            return newEntry;
+            return base.Update(id, entity);
         }
 
         private async Task<bool> IsItemExisted(TagValue entity)
@@ -108,6 +88,33 @@ namespace Kantin.Service.Providers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             return item;
+        }
+
+        private void CheckExistingTagValue(TagValue entity)
+        {
+            var titleExisted = false;
+            var itemIdExisted = false;
+            var itemTypeExisted = false;
+
+            var itemList = Context.TagValues.Where(m => m.Title == entity.Title);
+
+            if (itemList.Any())
+            {
+                titleExisted = true;
+                itemIdExisted = itemList.Any(item => item.ItemId == entity.ItemId);
+                itemTypeExisted = itemList.Any(item => item.ItemType == entity.ItemType);
+            }
+
+            if (!titleExisted || !itemIdExisted || !itemTypeExisted)
+                return;
+
+            throw new ConflictException(new List<PropertyErrorResult>()
+            {
+                new PropertyErrorResult
+                {
+                    FieldName = $"Tag Value with {nameof(TagValue.Title)} with value {entity.Title}, {nameof(TagValue.ItemId)} with value {entity.ItemId}, and {nameof(TagValue.ItemType)} with value {entity.ItemType} had already been existed in the database"
+                }
+            });
         }
     }
 }
