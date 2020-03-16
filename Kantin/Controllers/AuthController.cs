@@ -3,7 +3,9 @@ using Core.Exceptions.Models;
 using Kantin.Data;
 using Kantin.Service.Models.Auth;
 using Kantin.Service.Providers;
+using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -31,7 +33,8 @@ namespace Kantin.Controllers
         {
             using (var userProvider = new AccountProvider(_entities))
             {
-                var loginResult = await userProvider.Login(HttpContext.RequestServices, login);
+                var tokenService = HttpContext.RequestServices.GetService<ITokenAuthorizationService>();
+                var loginResult = await userProvider.Login(tokenService, login);
 
                 if (!loginResult.Success)
                     return Unauthorized(loginResult);
@@ -50,7 +53,8 @@ namespace Kantin.Controllers
         {
             using (var userProvider = new AccountProvider(_entities))
             {
-                var loginResult = await userProvider.Register(HttpContext.RequestServices, register);
+                var tokenService = HttpContext.RequestServices.GetService<ITokenAuthorizationService>();
+                var loginResult = await userProvider.Register(tokenService, register);
 
                 if (!loginResult.Success)
                     return BadRequest(loginResult);

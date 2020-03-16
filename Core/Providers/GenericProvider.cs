@@ -50,7 +50,7 @@ namespace Core.Providers
             if(entity.Id == Guid.Empty)
                 entity.Id = Guid.NewGuid();
 
-            if (entity is IOrganisationModel organisationModel)
+            if (entity is IOrganisationModel organisationModel && organisationModel.OrganisationId == Guid.Empty)
                 organisationModel.SetOrganisationId(AccountIdentity?.OrganisationId);
 
             await BeforeCreate(entity);
@@ -59,7 +59,7 @@ namespace Core.Providers
             await Context.SaveChangesAsync();
 
             await AfterCreate(entity);
-            return (T)result.Entity;
+            return result.Entity as T;
         }
 
         public virtual async Task<bool> Delete(Guid id)
@@ -103,7 +103,7 @@ namespace Core.Providers
                 model.OrganisationId != AccountIdentity.OrganisationId)
                 HandleItemNotFound(id);
 
-            return (T)item;
+            return item as T;
         }
 
         protected void HandleItemNotFound(Guid id)

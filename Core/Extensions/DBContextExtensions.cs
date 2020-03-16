@@ -9,6 +9,9 @@ namespace Core.Extensions
     {
         public static void Rollback(this DbContext context)
         {
+            if (context?.ChangeTracker == null)
+                return;
+
             foreach (var entry in context.ChangeTracker.Entries())
             {
                 switch (entry.State)

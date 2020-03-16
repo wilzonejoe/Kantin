@@ -9,7 +9,6 @@ using Kantin.Service.Extensions;
 using Kantin.Service.Models.Auth;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +20,7 @@ namespace Kantin.Service.Providers
     {
         public AccountProvider(KantinEntities context) : base(context) { }
 
-        public async Task<LoginResult> Login(IServiceProvider serviceProvider, Login login)
+        public async Task<LoginResult> Login(ITokenAuthorizationService tokenService, Login login)
         {
             login.Validate();
 
@@ -30,10 +29,10 @@ namespace Kantin.Service.Providers
             var account = Context.Accounts.FirstOrDefault(account =>
                 account.Username.ToLower() == login.Username.ToLower() && account.Password == hashedPassword);
 
-            return await ProcessSession(serviceProvider, account);
+            return await ProcessSession(tokenService, account);
         }
 
-        public async Task<LoginResult> Register(IServiceProvider serviceProvider, Register register)
+        public async Task<LoginResult> Register(ITokenAuthorizationService tokenService, Register register)
         {
             register.Validate();
             CanRegisterEligibility(register);
@@ -61,7 +60,7 @@ namespace Kantin.Service.Providers
 
                 var createdAccount = await Create(account);
 
-                return await ProcessSession(serviceProvider, createdAccount);
+                return await ProcessSession(tokenService, createdAccount);
             }
             catch
             {
@@ -96,14 +95,13 @@ namespace Kantin.Service.Providers
                 throw new ConflictException(propertyErrors);
         }
 
-        private async Task<LoginResult> ProcessSession(IServiceProvider serviceProvider, Account account)
+        private async Task<LoginResult> ProcessSession(ITokenAuthorizationService tokenService, Account account)
         {
             var loginResult = GenerateLoginResult(account);
 
             if (!loginResult.Success)
                 return loginResult;
 
-            var tokenService = serviceProvider.GetService<ITokenAuthorizationService>();
             await tokenService.SaveToken(loginResult.Token, account.Id);
 
             return loginResult;
