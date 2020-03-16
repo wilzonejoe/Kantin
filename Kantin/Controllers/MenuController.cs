@@ -57,6 +57,14 @@ namespace Kantin.Controllers
             }
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> Paging(int pageNumber, int pageSize)
+        {
+            var service = new MenuProvider(_entities);
+            var result = service.Paging(pageNumber, pageSize);
+            return Ok(result);
+        }
+
         [HttpPost]
         [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]

@@ -83,5 +83,11 @@ namespace Kantin.Service.Providers
                 item.MenuItemsOnMenus.Clear();
             }
         }
+
+        public IQueryable<Menu> Paging(in int pageNumber, in int pageSize)
+        {
+            var menus = Context.Menus.OrderBy(a => a.Title);
+            return menus.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+        }
     }
 }
