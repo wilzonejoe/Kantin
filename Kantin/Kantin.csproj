@@ -29,5 +29,9 @@
     <ProjectReference Include="..\Kantin.Service\Kantin.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 
 </Project>
