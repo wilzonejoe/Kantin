@@ -46,7 +46,7 @@ Show Package Manager Console
 
 Migrate database Steps (From Package Manager Console)
 1. cd Kantin //Make sure that you are in the project folder
-2. dotnet ef migrations add <Name of migration> //Create migration
+2. dotnet ef migrations add "Name of migration" //Create migration
 
 Roadmaps
 ==============================================================
