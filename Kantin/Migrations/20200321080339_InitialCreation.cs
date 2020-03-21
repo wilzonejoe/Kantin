@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kantin.Migrations
 {
-    public partial class UpdateOrg : Migration
+    public partial class InitialCreation : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -34,7 +34,7 @@ namespace Kantin.Migrations
                     Username = table.Column<string>(maxLength: 50, nullable: false),
                     Password = table.Column<string>(nullable: false),
                     IsArchived = table.Column<bool>(nullable: false),
-                    OrganisationId = table.Column<Guid>(nullable: true)
+                    OrganisationId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,7 +69,7 @@ namespace Kantin.Migrations
                         column: x => x.OrganisationId,
                         principalTable: "Organisations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,7 +94,7 @@ namespace Kantin.Migrations
                         column: x => x.OrganisationId,
                         principalTable: "Organisations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,7 +117,7 @@ namespace Kantin.Migrations
                         column: x => x.OrganisationId,
                         principalTable: "Organisations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -138,7 +138,7 @@ namespace Kantin.Migrations
                         column: x => x.OrganisationId,
                         principalTable: "Organisations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -159,7 +159,7 @@ namespace Kantin.Migrations
                         column: x => x.AccountId,
                         principalTable: "Accounts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -176,13 +176,13 @@ namespace Kantin.Migrations
                 {
                     table.PrimaryKey("PK_MenuAddOnItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AddOnItem_MenuAddOnItem",
+                        name: "FK_MenuAddOnItems_AddOnItems_AddOnItemId",
                         column: x => x.AddOnItemId,
                         principalTable: "AddOnItems",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MenuItem_MenuAddOnItem",
+                        name: "FK_MenuAddOnItems_MenuItems_MenuItemId",
                         column: x => x.MenuItemId,
                         principalTable: "MenuItems",
                         principalColumn: "Id",
@@ -203,13 +203,13 @@ namespace Kantin.Migrations
                 {
                     table.PrimaryKey("PK_MenuItemsOnMenus", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Menu_MenuItemsOnMenu",
+                        name: "FK_MenuItemsOnMenus_Menus_MenuId",
                         column: x => x.MenuId,
                         principalTable: "Menus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MenuItem_MenuItemsOnMenu",
+                        name: "FK_MenuItemsOnMenus_MenuItems_MenuItemId",
                         column: x => x.MenuItemId,
                         principalTable: "MenuItems",
                         principalColumn: "Id",
@@ -238,7 +238,7 @@ namespace Kantin.Migrations
                         column: x => x.OrganisationId,
                         principalTable: "Organisations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_TagValues_TagGroups_TagGroupId",
                         column: x => x.TagGroupId,

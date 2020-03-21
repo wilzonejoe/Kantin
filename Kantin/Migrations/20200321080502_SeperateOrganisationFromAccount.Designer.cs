@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kantin.Migrations
 {
     [DbContext(typeof(KantinEntities))]
-    [Migration("20200321040857_UpdateOrg")]
-    partial class UpdateOrg
+    [Migration("20200321080502_SeperateOrganisationFromAccount")]
+    partial class SeperateOrganisationFromAccount
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -351,7 +351,8 @@ namespace Kantin.Migrations
                 {
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("Accounts")
-                        .HasForeignKey("OrganisationId");
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Kantin.Data.Models.AddOnItem", b =>
@@ -359,7 +360,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("AddOnItems")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -368,7 +369,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("Menus")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -377,14 +378,12 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.AddOnItem", "AddOnItem")
                         .WithMany("MenuAddOnItems")
                         .HasForeignKey("AddOnItemId")
-                        .HasConstraintName("FK_AddOnItem_MenuAddOnItem")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Kantin.Data.Models.MenuItem", "MenuItem")
                         .WithMany("MenuAddOnItems")
                         .HasForeignKey("MenuItemId")
-                        .HasConstraintName("FK_MenuItem_MenuAddOnItem")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -394,7 +393,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("MenuItems")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -403,14 +402,12 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Menu", "Menu")
                         .WithMany("MenuItemsOnMenus")
                         .HasForeignKey("MenuId")
-                        .HasConstraintName("FK_Menu_MenuItemsOnMenu")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Kantin.Data.Models.MenuItem", "MenuItem")
                         .WithMany("MenuItemsOnMenus")
                         .HasForeignKey("MenuItemId")
-                        .HasConstraintName("FK_MenuItem_MenuItemsOnMenu")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -420,7 +417,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Account", "Account")
                         .WithMany("Sessions")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -429,7 +426,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("TagGroups")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -438,7 +435,7 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("TagValues")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Kantin.Data.Models.TagGroup", "TagGroup")

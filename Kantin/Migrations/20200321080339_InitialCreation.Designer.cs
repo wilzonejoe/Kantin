@@ -4,14 +4,16 @@ using Kantin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kantin.Migrations
 {
     [DbContext(typeof(KantinEntities))]
-    partial class KantinEntitiesModelSnapshot : ModelSnapshot
+    [Migration("20200321080339_InitialCreation")]
+    partial class InitialCreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,7 +38,7 @@ namespace Kantin.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("OrganisationId")
+                    b.Property<Guid>("OrganisationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Password")
@@ -350,7 +352,8 @@ namespace Kantin.Migrations
                     b.HasOne("Kantin.Data.Models.Organisation", "Organisation")
                         .WithMany("Accounts")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Kantin.Data.Models.AddOnItem", b =>

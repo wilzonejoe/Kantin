@@ -1,10 +1,6 @@
-﻿using Core.Models.Abstracts;
-using Core.Models.Auth;
-using Kantin.Data.Extensions;
+﻿using Kantin.Data.Helpers;
 using Kantin.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,60 +25,32 @@ namespace Kantin.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            SetRelation(modelBuilder);
-        }
-
-        private void SetRelation(ModelBuilder modelBuilder)
-        {
-            modelBuilder.SetMenuItemsRelations();
-            modelBuilder.SetAddOnItemsRelations();
-            modelBuilder.SetMenusRelations();
-            modelBuilder.SetTagValuesRelation();
+            DbContextHelper.RestrictDeletion(modelBuilder);
+            base.OnModelCreating(modelBuilder);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            SetOperationDate();
+            DbContextHelper.SetOperationDate(ChangeTracker);
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
-            SetOperationDate();
+            DbContextHelper.SetOperationDate(ChangeTracker);
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            SetOperationDate();
+            DbContextHelper.SetOperationDate(ChangeTracker);
             return base.SaveChangesAsync(cancellationToken);
         }
 
         public override int SaveChanges()
         {
-            SetOperationDate();
+            DbContextHelper.SetOperationDate(ChangeTracker);
             return base.SaveChanges();
-        }
-
-        private void SetOperationDate()
-        {
-            var entries = ChangeTracker.Entries()
-                .Where(x => x.Entity is BaseEntity);
-
-            foreach (var entry in entries)
-            {
-                entry.Property(nameof(BaseEntity.UpdatedDateUTC)).CurrentValue = DateTime.UtcNow;
-
-                switch (entry.State)
-                {
-                    case EntityState.Modified:
-                        entry.Property(nameof(BaseEntity.CreatedDateUTC)).IsModified = false;
-                        break;
-                    case EntityState.Added:
-                        entry.Property(nameof(BaseEntity.CreatedDateUTC)).CurrentValue = DateTime.UtcNow;
-                        break;
-                }
-            }
         }
     }
 }
