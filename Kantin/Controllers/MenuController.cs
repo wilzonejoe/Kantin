@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Model;
 
 namespace Kantin.Controllers
 {
@@ -32,11 +33,11 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Menu>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]Query query)
         {
             using (var service = new MenuProvider(_entities))
             {
-                var result = await service.GetAll(null);
+                var result = await service.GetAll(query);
                 return Ok(result);
             }
         }

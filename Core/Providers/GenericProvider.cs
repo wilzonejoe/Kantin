@@ -35,7 +35,18 @@ namespace Core.Providers
         #region Basic CRUD
         public virtual async Task<IEnumerable<T>> GetAll(Query query)
         {
-            return await Task.Run(() => Context.Set<T>().AsQueryable().ToList());
+            if (query?.pageNumber != null && query.pageSize != null && 
+                query.pageNumber > 0 && query.pageSize > 0)
+            {
+                return await Context.Set<T>()
+                    .AsQueryable()
+                    .OrderBy(a => a.CreatedDateUTC)
+                    .Skip((query.pageNumber.Value - 1) * query.pageSize.Value)
+                    .Take(query.pageSize.Value)
+                    .ToListAsync();
+            }
+
+            return await Context.Set<T>().AsQueryable().ToListAsync();
         }
 
         public virtual async Task<T> Get(Guid id)
