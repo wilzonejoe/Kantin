@@ -1,5 +1,6 @@
 ﻿using Core.Models.Auth;
 using Kantin.Data;
+using Kantin.Data.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace Kantin.Service.Services
 
         public async Task SaveToken(string token, Guid accountId)
         {
-            var session = new BaseSession
+            var session = new Session
             {
                 AccountId = accountId,
                 Token = token

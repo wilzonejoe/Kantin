@@ -6,8 +6,6 @@ namespace Kantin.Service.Models.Auth
     public class Register : IValidationObject
     {
         [Required]
-        public string OrganisationName { get; set; }
-        [Required]
         public string Fullname { get; set; }
         [Required]
         public string Username { get; set; }

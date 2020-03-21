@@ -39,22 +39,12 @@ namespace Kantin.Service.Providers
 
             try
             {
-                var organisation = new Organisation
-                {
-                    Id = Guid.NewGuid(),
-                    Name = register.OrganisationName,
-                    ExpiryDateUTC = DateTime.UtcNow.AddDays(SystemConstants.TrialPeriod)
-                };
-
-                await Context.Organisations.AddAsync(organisation);
-
                 var account = new Account
                 {
                     Id = Guid.NewGuid(),
                     Fullname = register.Fullname,
                     Username = register.Username,
                     Password = PasswordHelper.GenerateHash(register.Password),
-                    OrganisationId = organisation.Id,
                     IsArchived = false
                 };
 
@@ -74,15 +64,7 @@ namespace Kantin.Service.Providers
             var propertyErrors = new List<PropertyErrorResult>();
             var errorMessageTemplate = "{0} with value of {1} has been taken";
 
-            var organisationNameExisted = Context.Organisations.Any(o => o.Name.ToLower() == register.OrganisationName.ToLower());
             var usernameExisted = Context.Accounts.Any(a => a.Username.ToLower() == register.Username.ToLower());
-
-            if (organisationNameExisted)
-                propertyErrors.Add(new PropertyErrorResult
-                {
-                    FieldName = nameof(register.OrganisationName),
-                    FieldErrors = string.Format(errorMessageTemplate, nameof(register.OrganisationName), register.OrganisationName)
-                });
 
             if (usernameExisted)
                 propertyErrors.Add(new PropertyErrorResult
@@ -91,7 +73,7 @@ namespace Kantin.Service.Providers
                     FieldErrors = string.Format(errorMessageTemplate, nameof(register.Username), register.Username)
                 });
 
-            if (organisationNameExisted || usernameExisted)
+            if (usernameExisted)
                 throw new ConflictException(propertyErrors);
         }
 
