@@ -13,7 +13,7 @@ namespace Kantin.Data
     public class KantinEntities : DbContext
     {
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<BaseSession> Sessions { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<Menu> Menus { get; set; }
         public DbSet<MenuItemOnMenu> MenuItemsOnMenus { get; set; }
@@ -25,7 +25,6 @@ namespace Kantin.Data
 
         public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
-            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,12 +34,9 @@ namespace Kantin.Data
 
         private void SetRelation(ModelBuilder modelBuilder)
         {
-            modelBuilder.SetAccountsRelations();
-            modelBuilder.SetOrganisationRelations();
             modelBuilder.SetMenuItemsRelations();
             modelBuilder.SetAddOnItemsRelations();
             modelBuilder.SetMenusRelations();
-            modelBuilder.SetTagGroupsRelation();
             modelBuilder.SetTagValuesRelation();
         }
 

@@ -13,10 +13,6 @@ namespace Kantin.Data.Extensions
                 .HasForeignKey(miom => miom.MenuId)
                 .HasConstraintName("FK_Menu_MenuItemsOnMenu")
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Menu>()
-                .HasOne(m => m.Organisation)
-                .WithMany(o => o.Menus);
         }
     }
 }
