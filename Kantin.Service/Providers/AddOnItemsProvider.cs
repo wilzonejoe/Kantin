@@ -39,11 +39,5 @@ namespace Kantin.Service.Providers
             var existedMenuAddOnItems = Context.MenuAddOnItems.Where(mad => mad.AddOnItemId == addOnItemId);
             Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
         }
-
-        public IQueryable<AddOnItem> Paging(int pageNumber, int pageSize)
-        {
-            var addOns = Context.AddOnItems.OrderBy(a => a.Title);
-            return addOns.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-        }
     }
 }

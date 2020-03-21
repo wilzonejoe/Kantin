@@ -38,13 +38,15 @@ namespace Core.Providers
             if (query?.pageNumber != null && query.pageSize != null && 
                 query.pageNumber > 0 && query.pageSize > 0)
             {
-                return Context.Set<T>()
+                return await Context.Set<T>()
+                    .AsQueryable()
                     .OrderBy(a => a.CreatedDateUTC)
                     .Skip((query.pageNumber.Value - 1) * query.pageSize.Value)
-                    .Take(query.pageSize.Value);
+                    .Take(query.pageSize.Value)
+                    .ToListAsync();
             }
 
-            return await Task.Run(() => Context.Set<T>().AsQueryable().ToList());
+            return await Context.Set<T>().AsQueryable().ToListAsync();
         }
 
         public virtual async Task<T> Get(Guid id)

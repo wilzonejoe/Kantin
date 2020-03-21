@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Exceptions.Models;
+using Core.Model;
 using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
@@ -32,11 +33,11 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<MenuItem>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]Query query)
         {
             using (var service = new MenuItemsProvider(_entities))
             {
-                var result = await service.GetAll(null);
+                var result = await service.GetAll(query);
                 return Ok(result);
             }
         }
@@ -55,15 +56,6 @@ namespace Kantin.Controllers
                 var response = _mapper.Map<EditableMenuItemResponse>(result);
                 return Ok(response);
             }
-        }
-
-        [HttpGet("[action]")]
-        public async Task<IActionResult> Paging(int pageNumber, int pageSize)
-        {
-            var service = new MenuItemsProvider(_entities);
-            var result = service.Paging(pageNumber, pageSize);
-            return Ok(result);
-
         }
 
         [HttpPost]

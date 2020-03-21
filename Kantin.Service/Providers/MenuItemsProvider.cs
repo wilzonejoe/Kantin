@@ -126,10 +126,5 @@ namespace Kantin.Service.Providers
             }
         }
 
-        public IQueryable<MenuItem> Paging(int pageNumber, int pageSize)
-        {
-            var menuItems = Context.MenuItems.OrderBy(a => a.Title);
-            return menuItems.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-        }
     }
 }
