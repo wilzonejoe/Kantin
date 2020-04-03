@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Models.Auth
 {
-    public class BaseAccount : ValidationEntity, IOrganisationModel
+    public class BaseAccount : ValidationEntity
     {
         [Required]
         [MaxLength(200)]
@@ -20,6 +20,6 @@ namespace Core.Models.Auth
 
         public bool IsArchived { get; set; }
 
-        public Guid OrganisationId { get; set; }
+        public Guid? OrganisationId { get; set; }
     }
 }

@@ -37,7 +37,10 @@ namespace Kantin
 
             // Add framework services.
             var connectionString = Configuration.GetConnectionString("SqlConnection");
-            services.AddDbContext<KantinEntities>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<KantinEntities>(options => 
+            {
+                options.UseSqlServer(connectionString, b => b.MigrationsAssembly("Kantin"));
+            });
 
             // Add Validation services
             services.AddTransient<ITokenAuthorizationService, TokenAuthorizationService>();
@@ -55,10 +58,13 @@ namespace Kantin
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, KantinEntities dbContext)
         {
             if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
+                dbContext.Database.Migrate();
+            }
 
             ConfigureSwaggerApp(app);
 
