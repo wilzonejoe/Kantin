@@ -16,6 +16,9 @@ namespace Kantin.Data
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<OrderAddOn> OrderAddOns { get; set; }
         public DbSet<TagValue> TagValues { get; set; }
         public DbSet<TagGroup> TagGroups { get; set; }
 
