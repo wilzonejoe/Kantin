@@ -7,6 +7,7 @@ using Core.Exceptions.Models;
 using Core.Models.Auth;
 using Core.Providers;
 using Kantin.Data;
+using Kantin.Data.Enumerable;
 using Kantin.Data.Models;
 
 namespace Kantin.Service.Providers

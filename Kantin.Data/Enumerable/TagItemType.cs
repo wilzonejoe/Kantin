@@ -1,4 +1,4 @@
-﻿namespace Kantin.Data.Models
+﻿namespace Kantin.Data.Enumerable
 {
     public enum TagItemType
     {

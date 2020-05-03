@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Kantin.Models.Response
 {
-    public class EditableMenuResponse : MenuItem
+    public class EditableMenuResponse : Menu
     {
         public List<MenuItem> MenuItems { get; set; }
 
