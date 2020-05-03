@@ -13,6 +13,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{33B9B4DD-B3CD-41FD-BFCC-F78AEC7471EA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kantin.Tests", "Kantin.Tests\Kantin.Tests.csproj", "{DD2F5911-564C-46FE-A753-20625B20DE30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{33B9B4DD-B3CD-41FD-BFCC-F78AEC7471EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33B9B4DD-B3CD-41FD-BFCC-F78AEC7471EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33B9B4DD-B3CD-41FD-BFCC-F78AEC7471EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD2F5911-564C-46FE-A753-20625B20DE30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD2F5911-564C-46FE-A753-20625B20DE30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD2F5911-564C-46FE-A753-20625B20DE30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD2F5911-564C-46FE-A753-20625B20DE30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

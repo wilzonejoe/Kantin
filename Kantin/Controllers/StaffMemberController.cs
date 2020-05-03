@@ -1,46 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Core.Exceptions.Models;
+using Core.Model;
 using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Service.Attributes;
 using Kantin.Service.Providers;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
-namespace Kantin.Controllers.Tag
+namespace Kantin.Controllers
 {
     [Route("api/[controller]")]
-    public class TagValueController: Controller
+    public class StaffMemberController : Controller
     {
         private KantinEntities _entities;
-        public TagValueController(KantinEntities entities) { _entities = entities; }
+        private IMapper _mapper;
+
+        public StaffMemberController(KantinEntities entities, IMapper mapper)
+        {
+            _entities = entities;
+            _mapper = mapper;
+        }
 
         [HttpGet]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<TagValue>))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Account>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]Query query)
         {
-            using (var service = new TagValueProvider(_entities))
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
+            using (var service = new StaffMemberProvider(_entities, accountIdentity))
             {
-                var result = await service.GetAll(null);
+                var result = await service.GetAll(query);
                 return Ok(result);
             }
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TagValue))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
-            using (var service = new TagValueProvider(_entities))
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
+            using (var service = new StaffMemberProvider(_entities, accountIdentity))
             {
                 var result = await service.Get(id);
                 return Ok(result);
@@ -48,41 +61,42 @@ namespace Kantin.Controllers.Tag
         }
 
         [HttpPost]
+        [UserAuthorization(nameof(Privilege.CanAccessStaffMember))]
         [Produces(SwaggerConstant.JsonResponseType)]
-        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(TagValue))]
-        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(Account))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
-        public async Task<IActionResult> Post([FromBody]TagValue tags)
+        public async Task<IActionResult> Post([FromBody]Account account)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
+            using (var service = new StaffMemberProvider(_entities, accountIdentity))
             {
-                var result = await service.Create(tags);
-                return Created($"api/tags/{result.Id}", result);
+                var result = await service.Create(account);
+                return Created($"api/staffmember/{result.Id}", result);
             }
         }
 
         [HttpPut("{id}")]
+        [UserAuthorization(nameof(Privilege.CanAccessStaffMember))]
         [Produces(SwaggerConstant.JsonResponseType)]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TagValue))]
-        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Account))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
-        public async Task<IActionResult> Put(Guid id, [FromBody]TagValue tagValue)
+        public async Task<IActionResult> Put(Guid id, [FromBody]Account account)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
+            using (var service = new StaffMemberProvider(_entities, accountIdentity))
             {
-                var result = await service.Update(id, tagValue);
+                var result = await service.Update(id, account);
                 return Ok(result);
             }
         }
 
         [HttpDelete("{id}")]
+        [UserAuthorization(nameof(Privilege.CanAccessStaffMember))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -91,7 +105,7 @@ namespace Kantin.Controllers.Tag
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
+            using (var service = new StaffMemberProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
                 if (result)

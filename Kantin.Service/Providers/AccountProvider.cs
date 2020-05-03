@@ -35,26 +35,16 @@ namespace Kantin.Service.Providers
         public async Task<LoginResult> Register(ITokenAuthorizationService tokenService, Register register)
         {
             register.Validate();
-            CanRegisterEligibility(register);
+            CheckRegisterEligibility(register);
 
             try
             {
-                var organisation = new Organisation
-                {
-                    Id = Guid.NewGuid(),
-                    Name = register.OrganisationName,
-                    ExpiryDateUTC = DateTime.UtcNow.AddDays(SystemConstants.TrialPeriod)
-                };
-
-                await Context.Organisations.AddAsync(organisation);
-
                 var account = new Account
                 {
                     Id = Guid.NewGuid(),
                     Fullname = register.Fullname,
                     Username = register.Username,
                     Password = PasswordHelper.GenerateHash(register.Password),
-                    OrganisationId = organisation.Id,
                     IsArchived = false
                 };
 
@@ -69,30 +59,23 @@ namespace Kantin.Service.Providers
             }
         }
 
-        private void CanRegisterEligibility(Register register)
+        private void CheckRegisterEligibility(Register register)
         {
             var propertyErrors = new List<PropertyErrorResult>();
             var errorMessageTemplate = "{0} with value of {1} has been taken";
 
-            var organisationNameExisted = Context.Organisations.Any(o => o.Name.ToLower() == register.OrganisationName.ToLower());
             var usernameExisted = Context.Accounts.Any(a => a.Username.ToLower() == register.Username.ToLower());
 
-            if (organisationNameExisted)
-                propertyErrors.Add(new PropertyErrorResult
-                {
-                    FieldName = nameof(register.OrganisationName),
-                    FieldErrors = string.Format(errorMessageTemplate, nameof(register.OrganisationName), register.OrganisationName)
-                });
+            if (!usernameExisted)
+                return;
 
-            if (usernameExisted)
-                propertyErrors.Add(new PropertyErrorResult
-                {
-                    FieldName = nameof(register.Username),
-                    FieldErrors = string.Format(errorMessageTemplate, nameof(register.Username), register.Username)
-                });
+            propertyErrors.Add(new PropertyErrorResult
+            {
+                FieldName = nameof(register.Username),
+                FieldErrors = string.Format(errorMessageTemplate, nameof(register.Username), register.Username)
+            });
 
-            if (organisationNameExisted || usernameExisted)
-                throw new ConflictException(propertyErrors);
+            throw new ConflictException(propertyErrors);
         }
 
         private async Task<LoginResult> ProcessSession(ITokenAuthorizationService tokenService, Account account)
