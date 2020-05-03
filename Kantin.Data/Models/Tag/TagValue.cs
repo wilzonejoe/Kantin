@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Core.Models.Abstracts;
+using Kantin.Data.Enumerable;
 using Newtonsoft.Json;
 
 namespace Kantin.Data.Models
