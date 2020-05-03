@@ -7,10 +7,10 @@ namespace Kantin.Tests.Utils
     {
         /*
          * True: if you would like to test the change in fake/in memory database
-         * False: if you would like to test the change in real database
+         * False: if you would like to test the change in real docker database
          * Note: DO NOT COMMIT any change, if you changed this.
          */
-        public readonly bool UseInMemoryDatabase = true;
+        public readonly bool UseInMemoryDatabase = false;
 
         /*
          * Connection string to current docker SQL server

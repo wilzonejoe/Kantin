@@ -2,15 +2,17 @@
 using Kantin.Service.Models.Auth;
 using Kantin.Tests.Models;
 using NUnit.Framework;
+using RestSharp;
 using System.Linq;
 
 namespace Kantin.Tests.Validator
 {
     public static class LoginResultValidator
     {
-        public static void ValidateSuccessLoginResult(KantinEntities context, LoginResult loginResult)
+        public static void ValidateSuccessLoginResult(KantinEntities context, IRestResponse<LoginResult> response)
         {
             var result = new ValidateResult();
+            var loginResult = response.Data;
 
             if (!loginResult.Success)
             {
@@ -34,9 +36,10 @@ namespace Kantin.Tests.Validator
             Assert.IsTrue(result.Success, result.Message);
         }
 
-        public static void ValidateFailedLoginResult(LoginResult loginResult)
+        public static void ValidateFailedLoginResult(IRestResponse<LoginResult> response)
         {
             var result = new ValidateResult();
+            var loginResult = response.Data;
 
             if (loginResult.Success)
             {

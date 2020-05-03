@@ -1,4 +1,6 @@
-﻿using Kantin.Service.Services;
+﻿using Core.Helpers;
+using Kantin.Data.Models;
+using Kantin.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +16,14 @@ namespace Kantin.Service.Attributes
     {
         private const string AuthorizationKey = "Authorization";
         private const string AuthorizationScheme = JwtBearerDefaults.AuthenticationScheme;
+        private readonly string[] _privilegeNames;
+
+        public UserAuthorizationAttribute() { _privilegeNames = new string[] { }; }
+
+        public UserAuthorizationAttribute(string privilegeName) { _privilegeNames = new string[] { privilegeName }; }
+
+        public UserAuthorizationAttribute(string[] privilegeNames) { _privilegeNames = privilegeNames; }
+
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var hasAuthorizationKey = context.HttpContext.Request.Headers.TryGetValue(AuthorizationKey, out var authorizationHeaderValue);
@@ -23,10 +33,26 @@ namespace Kantin.Service.Attributes
 
             var token = GetTokenFromAuthorizationHeaderValue(authorizationHeaderValue);
             var tokenService = context.HttpContext.RequestServices.GetService<ITokenAuthorizationService>();
-            var tokenAuthorized = tokenService.AuthorizeToken(token);
+            var session = tokenService.AuthorizeToken(token);
 
-            if (!tokenAuthorized)
+            if (session == null)
+            {
                 context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Unauthorized);
+            }
+            else
+            {
+                if (session?.Account?.OrganisationId == null)
+                    return;
+
+                if (session?.Account?.Privilege == null)
+                    context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Unauthorized);
+
+                if (_privilegeNames == null || !_privilegeNames.Any())
+                    return;
+
+                if (!CanAccessController(session))
+                    context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
+            }
         }
 
         private bool HasAuthorizationScheme(string authorizationHeaderValue)
@@ -50,6 +76,20 @@ namespace Kantin.Service.Attributes
                 return null;
 
             return tokenParts.LastOrDefault();
+        }
+
+        private bool CanAccessController(Session session)
+        {
+            var privilege = session?.Account?.Privilege;
+            foreach (var privilegeNames in _privilegeNames)
+            {
+                var hasPrivilege = ReflectionsHelper.FindValueFromObject<bool, Privilege>(privilege, privilegeNames);
+
+                if (!hasPrivilege)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

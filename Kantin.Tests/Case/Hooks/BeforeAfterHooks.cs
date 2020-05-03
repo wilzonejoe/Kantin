@@ -20,12 +20,13 @@ namespace Kantin.Tests.Case.Hooks
             var dbContextCreator = new DbContextCreator();
             var dbContextContainer = dbContextCreator.CreateDbContext();
             Context[ContextContants.DatabaseContainerContext] = dbContextContainer;
-            Context[ContextContants.CurrentTimestampContext] = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+            Context[ContextContants.CurrentTimestampContext] = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
         }
 
         [AfterScenario]
         public void AfterScenario()
         {
+            Context.Clear();
         }
     }
 }

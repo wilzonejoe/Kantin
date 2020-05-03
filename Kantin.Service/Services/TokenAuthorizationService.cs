@@ -1,6 +1,7 @@
 ﻿using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Kantin.Service.Services
 {
     public interface ITokenAuthorizationService
     {
-        public bool AuthorizeToken(string token);
+        public Session AuthorizeToken(string token);
         public Task SaveToken(string token, Guid accountId);
     }
 
@@ -18,10 +19,12 @@ namespace Kantin.Service.Services
         public KantinEntities Context { get; private set; }
         public TokenAuthorizationService(KantinEntities context) { Context = context; }
 
-        public bool AuthorizeToken(string token)
+        public Session AuthorizeToken(string token)
         {
             return Context.Sessions
-                .Any(s => s.Token == token);
+                .Include(s => s.Account)
+                .ThenInclude(a => a.Privilege)
+                .FirstOrDefault(s => s.Token == token);
         }
 
         public async Task SaveToken(string token, Guid accountId)

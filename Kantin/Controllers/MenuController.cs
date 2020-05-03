@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Core.Exceptions.Models;
-using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Models.Request;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Model;
+using Kantin.Service.Services;
 
 namespace Kantin.Controllers
 {
@@ -59,7 +59,7 @@ namespace Kantin.Controllers
         }
 
         [HttpPost]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(EditableMenuResponse))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
@@ -67,7 +67,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Post([FromBody]EditableMenuRequest editableMenu)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new MenuProvider(_entities, accountIdentity))
             {
                 var menu = _mapper.Map<Menu>(editableMenu);
@@ -78,7 +78,7 @@ namespace Kantin.Controllers
         }
 
         [HttpPut("{id}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EditableMenuResponse))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
@@ -87,7 +87,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Put(Guid id, [FromBody]EditableMenuRequest editableMenu)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new MenuProvider(_entities, accountIdentity))
             {
                 var menu = _mapper.Map<Menu>(editableMenu);
@@ -98,7 +98,7 @@ namespace Kantin.Controllers
         }
 
         [HttpDelete("{id}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -106,7 +106,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new MenuProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);

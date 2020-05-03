@@ -7,6 +7,7 @@ using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Service.Providers;
+using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kantin.Controllers.Tag
@@ -56,7 +57,7 @@ namespace Kantin.Controllers.Tag
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Post([FromBody]TagGroup tags)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Create(tags);
@@ -74,7 +75,7 @@ namespace Kantin.Controllers.Tag
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Put(Guid id, [FromBody]TagGroup tagGroup)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Update(id, tagGroup);
@@ -90,7 +91,7 @@ namespace Kantin.Controllers.Tag
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new TagGroupProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);

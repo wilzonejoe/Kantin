@@ -4,14 +4,16 @@ using Kantin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kantin.Migrations
 {
     [DbContext(typeof(KantinEntities))]
-    partial class KantinEntitiesModelSnapshot : ModelSnapshot
+    [Migration("20200325191545_OrganisationManagement")]
+    partial class OrganisationManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
