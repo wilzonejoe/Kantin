@@ -9,6 +9,7 @@ using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Service.Attributes;
 using Kantin.Service.Providers;
+using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kantin.Controllers
@@ -61,7 +62,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Post([FromBody]OrderItem orderItem)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new OrderItemProvider(_entities, accountIdentity))
             {
                 orderItem.CalculateMenuItemTotal();
@@ -81,7 +82,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Put(Guid id, [FromBody]OrderItem orderItem)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new OrderItemProvider(_entities, accountIdentity))
             {
                 orderItem.CalculateMenuItemTotal();
@@ -99,7 +100,7 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var accountIdentity = new AccountIdentity(HttpContext.User.Claims);
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
             using (var service = new OrderItemProvider(_entities, accountIdentity))
             {
                 var result = await service.Delete(id);
