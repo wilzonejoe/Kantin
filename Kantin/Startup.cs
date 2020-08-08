@@ -13,6 +13,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using System;
+using Azure.Storage.Blobs;
+using Core.Helpers;
+using Core.Interface;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Kantin
 {
@@ -46,6 +50,9 @@ namespace Kantin
             services.AddTransient<ITokenAuthorizationService, TokenAuthorizationService>();
             services.AddJWTAuthentication();
 
+            // Add File services
+            services.AddSingleton<IFileStorage<BlobContainerClient>, FileStorageHelper>();
+
             // Add AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -54,6 +61,12 @@ namespace Kantin
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kantin API", Version = "v1" });
                 c.SchemaFilter<SwaggerFilter>();
+            });
+
+            services.Configure<FormOptions>(o => {
+                o.ValueLengthLimit = int.MaxValue;
+                o.MultipartBodyLengthLimit = int.MaxValue;
+                o.MemoryBufferThreshold = int.MaxValue;
             });
         }
 

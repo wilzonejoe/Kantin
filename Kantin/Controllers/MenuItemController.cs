@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Exceptions.Models;
+using Core.Helpers;
 using Core.Model;
-using Core.Models.Auth;
+using Core.Models.File;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Handler;
 using Kantin.Models.Request;
 using Kantin.Models.Response;
 using Kantin.Service.Attributes;
 using Kantin.Service.Providers;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Kantin.Controllers
 {
@@ -21,11 +27,13 @@ namespace Kantin.Controllers
     public class MenuItemController : Controller
     {
         private KantinEntities _entities;
-        private IMapper _mapper;
+        private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public MenuItemController(KantinEntities entities, IMapper mapper)
+        public MenuItemController(KantinEntities entities, IMapper mapper, IConfiguration configuration)
         {
             _entities = entities;
+            _configuration = configuration;
             _mapper = mapper;
         }
 
@@ -115,6 +123,86 @@ namespace Kantin.Controllers
                     return NoContent();
                 
                 return NotFound();
+            }
+        }
+
+        [HttpPost("{id}/Upload")]
+        [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
+        public async Task<IActionResult> Upload(Guid id)
+        {
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
+
+            if (!accountIdentity.AccountId.HasValue || !accountIdentity.OrganisationId.HasValue)
+                return Unauthorized();
+
+            var fileStorageHelper = new FileStorageHelper(_configuration);
+            var files = Request.Form.Files;
+            var result = new List<UploadResult>();
+
+            using (var service = new MenuItemAttachmentsProvider(_entities, accountIdentity))
+            {
+                var organisationId = accountIdentity.OrganisationId.Value;
+
+                foreach (var file in files)
+                {
+                    var data = file.OpenReadStream();
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+
+                    var attachment = await service.Create(new MenuItemAttachment
+                    {
+                        FileName = fileName,
+                        OrganisationId = organisationId,
+                        MenuItemId = id
+                    });
+
+                    var uploadResult = await fileStorageHelper.Upload(new UploadFile
+                    {
+                        AttachmentId = attachment.Id,
+                        OrganisationId = organisationId,
+                        FileName = fileName,
+                        Data = data
+                    });
+
+                    result.Add(uploadResult);
+                }
+
+                return Ok(result);
+            }
+        }
+
+        [HttpGet("{id}/Download/{attachmentId}")]
+        [UserAuthorization]
+        [Produces(SwaggerConstant.JsonResponseType)]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(FileStreamResult))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
+        public async Task<IActionResult> Download(Guid id, Guid attachmentId)
+        {
+            var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
+
+            if (!accountIdentity.AccountId.HasValue || !accountIdentity.OrganisationId.HasValue)
+                return Unauthorized();
+            using (var service = new MenuItemAttachmentsProvider(_entities, accountIdentity))
+            {
+                var organisationId = accountIdentity.OrganisationId.Value;
+
+                var attachment = await service.Get(attachmentId);
+                if (attachment.MenuItemId != id)
+                    return NotFound();
+
+                var fileStorageHelper = new FileStorageHelper(_configuration);
+                var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
+                var mimeType = FileHelpers.GetMimeType(downloadResult.FileName);
+                return new FileStreamResult(downloadResult.Data, mimeType)
+                {
+                    FileDownloadName = downloadResult.FileName
+                };
             }
         }
     }

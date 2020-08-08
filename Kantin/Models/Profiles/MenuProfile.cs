@@ -11,11 +11,11 @@ namespace Kantin.Models.Profiles
         public MenuProfile()
         {
             CreateMap<Menu, EditableMenuResponse>(MemberList.Source)
-                .ForMember(dst => dst.MenuItems, opt => opt.MapFrom(src => src.MenuItemsOnMenus.Select(m => m.MenuItem)));
+                .ForMember(dst => dst.MenuItems, opt => opt.MapFrom(src => src.MenuItemMenus.Select(m => m.MenuItem)));
 
             CreateMap<EditableMenuRequest, Menu>(MemberList.Source)
-                .ForMember(dst => dst.MenuItemsOnMenus, opt => opt.MapFrom(src => 
-                    src.MenuItemIds.Select(menuItemId => new MenuItemOnMenu { MenuItemId = menuItemId })));
+                .ForMember(dst => dst.MenuItemMenus, opt => opt.MapFrom(src => 
+                    src.MenuItemIds.Select(menuItemId => new MenuItemMenu { MenuItemId = menuItemId })));
         }
     }
 }

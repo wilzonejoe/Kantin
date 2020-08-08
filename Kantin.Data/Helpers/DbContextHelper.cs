@@ -35,10 +35,23 @@ namespace Kantin.Data.Helpers
             // Set restriction to restrict on the deletion. 
             // Due to default ondelete behaviour is Cascade means that it will automagically deleting all of the entities related to the entity
 
-            var foreignKeys = modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys());
+            // var foreignKeys = modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys());
+            //
+            // foreach (var foreignKey in foreignKeys)
+            //     foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
 
-            foreach (var foreignKey in foreignKeys)
-                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // equivalent of modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+                entityType.SetTableName(entityType.DisplayName());
+
+                // equivalent of modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+                // and modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
+                entityType.GetForeignKeys()
+                    .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade)
+                    .ToList()
+                    .ForEach(fk => fk.DeleteBehavior = DeleteBehavior.Restrict);
+            }
         }
     }
 }

@@ -13,9 +13,11 @@ namespace Kantin.Data
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<Privilege> Privileges { get; set; }
         public DbSet<Menu> Menus { get; set; }
-        public DbSet<MenuItemOnMenu> MenuItemsOnMenus { get; set; }
+        public DbSet<MenuItemMenu> MenuItemMenus { get; set; }
+        public DbSet<MenuItemAttachment> MenuItemAttachments { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuAddOnItem> MenuAddOnItems { get; set; }
+        public DbSet<AddOnItemAttachment> AddOnItemAttachments { get; set; }
         public DbSet<AddOnItem> AddOnItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
@@ -25,6 +27,7 @@ namespace Kantin.Data
 
         public KantinEntities(DbContextOptions<KantinEntities> options) : base(options)
         {
+            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

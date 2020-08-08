@@ -17,6 +17,7 @@ namespace Kantin.Service.Providers
         public override async Task<MenuItem> Get(Guid id)
         {
             var menuItem = await Context.MenuItems
+                .Include(m => m.MenuItemAttachments)
                 .Include(m => m.MenuAddOnItems)
                 .ThenInclude(m => m.AddOnItem)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -30,21 +31,22 @@ namespace Kantin.Service.Providers
         protected override async Task BeforeCreate(MenuItem entity)
         {
             await ProcessMenuAddOnItem(entity, true);
-            await ProcessMenuItemOnMenus(entity, true);
+            await ProcessMenuItemMenus(entity, true);
             await base.BeforeCreate(entity);
         }
 
         protected override async Task BeforeUpdate(MenuItem entity)
         {
             await ProcessMenuAddOnItem(entity, false);
-            await ProcessMenuItemOnMenus(entity, false);
+            await ProcessMenuItemMenus(entity, false);
             await base.BeforeUpdate(entity);
         }
 
         protected override Task BeforeDelete(MenuItem entity)
         {
             ClearMenuAddOnItems(entity.Id);
-            ClearMenuItemsOnMenus(entity.Id);
+            ClearMenuItemMenus(entity.Id);
+            ClearMenuItemAttachments(entity.Id);
             return base.BeforeDelete(entity);
         }
 
@@ -54,10 +56,15 @@ namespace Kantin.Service.Providers
             Context.MenuAddOnItems.RemoveRange(existedMenuAddOnItems);
         }
 
-        private void ClearMenuItemsOnMenus(Guid menuItemId)
+        private void ClearMenuItemMenus(Guid menuItemId)
         {
-            var existedMenuItemOnMenus = Context.MenuItemsOnMenus.Where(miom => miom.MenuItemId == menuItemId);
-            Context.MenuItemsOnMenus.RemoveRange(existedMenuItemOnMenus);
+            var existedMenuItemMenus = Context.MenuItemMenus.Where(miom => miom.MenuItemId == menuItemId);
+            Context.MenuItemMenus.RemoveRange(existedMenuItemMenus);
+        }
+        private void ClearMenuItemAttachments(Guid menuItemId)
+        {
+            var existedMenuItemAttachments = Context.MenuItemAttachments.Where(mia => mia.MenuItemId == menuItemId);
+            Context.MenuItemAttachments.RemoveRange(existedMenuItemAttachments);
         }
 
         private async Task ProcessMenuAddOnItem(MenuItem item, bool isNew)
@@ -93,33 +100,33 @@ namespace Kantin.Service.Providers
             }
         }
 
-        private async Task ProcessMenuItemOnMenus(MenuItem item, bool isNew)
+        private async Task ProcessMenuItemMenus(MenuItem item, bool isNew)
         {
-            var menuItemOnMenus = item.MenuItemsOnMenus;
+            var MenuItemMenus = item.MenuItemMenus;
 
             if (!isNew)
-                ClearMenuItemsOnMenus(item.Id);
+                ClearMenuItemMenus(item.Id);
 
-            if (menuItemOnMenus != null && menuItemOnMenus.Any())
+            if (MenuItemMenus != null && MenuItemMenus.Any())
             {
-                var invalidMenuItemOnMenus = menuItemOnMenus.Where(mad => mad.MenuId == Guid.Empty);
-                foreach (var invalidMenuItemOnMenu in invalidMenuItemOnMenus)
-                    menuItemOnMenus.Remove(invalidMenuItemOnMenu);
+                var invalidMenuItemMenus = MenuItemMenus.Where(mad => mad.MenuId == Guid.Empty);
+                foreach (var invalidMenuItemMenu in invalidMenuItemMenus)
+                    MenuItemMenus.Remove(invalidMenuItemMenu);
 
-                foreach (var menuItemOnMenu in menuItemOnMenus)
+                foreach (var menuItemMenu in MenuItemMenus)
                 {
-                    if (menuItemOnMenu.Id == Guid.Empty)
+                    if (menuItemMenu.Id == Guid.Empty)
 
-                        if (menuItemOnMenu.Id == Guid.Empty)
-                            menuItemOnMenu.Id = Guid.NewGuid();
+                        if (menuItemMenu.Id == Guid.Empty)
+                            menuItemMenu.Id = Guid.NewGuid();
 
-                    var menuExisted = Context.Menus.Any(a => a.Id == menuItemOnMenu.MenuId);
+                    var menuExisted = Context.Menus.Any(a => a.Id == menuItemMenu.MenuId);
 
                     if (menuExisted)
                         continue;
 
-                    menuItemOnMenu.MenuItemId = item.Id;
-                    await Context.MenuItemsOnMenus.AddAsync(menuItemOnMenu);
+                    menuItemMenu.MenuItemId = item.Id;
+                    await Context.MenuItemMenus.AddAsync(menuItemMenu);
                 }
 
                 item.MenuAddOnItems.Clear();

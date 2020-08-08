@@ -19,11 +19,11 @@ namespace Kantin.Data.Models
         public Organisation Organisation { get; set; }
 
         [JsonIgnore]
-        public ICollection<MenuItemOnMenu> MenuItemsOnMenus { get; set; }
+        public ICollection<MenuItemMenu> MenuItemMenus { get; set; }
 
         public Menu() : base()
         {
-            MenuItemsOnMenus = new List<MenuItemOnMenu>();
+            MenuItemMenus = new List<MenuItemMenu>();
             Available = true;
         }
     }

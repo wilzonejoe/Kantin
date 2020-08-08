@@ -31,17 +31,26 @@ namespace Kantin.Service.Providers
 
         protected override async Task BeforeCreate(Organisation entity)
         {
-            CheckOrganisationCreateOrUpdateEligibility(entity);
+            var account = Context.Accounts.FirstOrDefault(a => a.Id == AccountIdentity.AccountId);
+            CheckOrganisationCreateOrUpdateEligibility(entity, account);
 
             entity.Id = Guid.NewGuid();
             entity.ExpiryDateUTC = DateTime.UtcNow.AddDays(SystemConstants.TrialPeriod);
-            SetAccountAsOrganisationAdmin(entity.Id);
+
+            account.OrganisationId = entity.Id;
             await base.BeforeCreate(entity);
+        }
+
+        protected override Task AfterCreate(Organisation entity)
+        {
+            SetAccountAsOrganisationAdmin(entity.Id);
+            return base.AfterCreate(entity);
         }
 
         protected override async Task BeforeUpdate(Organisation entity)
         {
-            CheckOrganisationCreateOrUpdateEligibility(entity);
+            var account = Context.Accounts.FirstOrDefault(a => a.Id == AccountIdentity.AccountId);
+            CheckOrganisationCreateOrUpdateEligibility(entity, account);
             await base.BeforeUpdate(entity);
         }
 
@@ -56,11 +65,9 @@ namespace Kantin.Service.Providers
             await base.BeforeDelete(entity);
         }
 
-        private void CheckOrganisationCreateOrUpdateEligibility(Organisation organisation)
+        private void CheckOrganisationCreateOrUpdateEligibility(Organisation organisation, Account account)
         {
             var propertyErrors = new List<PropertyErrorResult>();
-
-            var account = Context.Accounts.FirstOrDefault(a => a.Id == AccountIdentity.AccountId);
 
             if (account.OrganisationId != null)
             {
@@ -104,13 +111,15 @@ namespace Kantin.Service.Providers
             };
 
             Context.Privileges.Add(privilege);
+            Context.SaveChanges();
         }
 
         private async Task RemoveAllRelatedEntities(Organisation organisation)
         {
             var menuItemsToDelete = Context.MenuItems
                 .Include(mi => mi.MenuAddOnItems)
-                .Include(mi => mi.MenuItemsOnMenus)
+                .Include(mi => mi.MenuItemMenus)
+                .Include(mi => mi.MenuItemAttachments)
                 .Where(mi => mi.OrganisationId == organisation.Id);
 
             var menuAddOnItemsToDelete = new List<MenuAddOnItem>();
@@ -120,18 +129,37 @@ namespace Kantin.Service.Providers
                     menuAddOnItemsToDelete.Add(mad);
             });
 
-            var menuItemsOnMenusToDelete = new List<MenuItemOnMenu>();
-            await menuItemsToDelete.Select(mi => mi.MenuItemsOnMenus).ForEachAsync(mioms =>
+            var menuItemMenusToDelete = new List<MenuItemMenu>();
+            await menuItemsToDelete.Select(mi => mi.MenuItemMenus).ForEachAsync(mioms =>
             {
                 foreach (var miom in mioms)
-                    menuItemsOnMenusToDelete.Add(miom);
+                    menuItemMenusToDelete.Add(miom);
             });
 
-            var addOnItemsToDelete = Context.AddOnItems.Where(a => a.OrganisationId == organisation.Id);
+            var menuItemAttachmentsToDelete = new List<MenuItemAttachment>();
+            await menuItemsToDelete.Select(mi => mi.MenuItemAttachments).ForEachAsync(mias =>
+            {
+                foreach (var mia in mias)
+                    menuItemAttachmentsToDelete.Add(mia);
+            });
+
+            var addOnItemsToDelete = Context.AddOnItems
+                .Include(a => a.AddOnItemAttachments)
+                .Where(a => a.OrganisationId == organisation.Id);
+
+            var addOnItemAttachmentsToDelete = new List<AddOnItemAttachment>();
+            await addOnItemsToDelete.Select(a => a.AddOnItemAttachments).ForEachAsync(aoias =>
+            {
+                foreach (var aoia in aoias)
+                    addOnItemAttachmentsToDelete.Add(aoia);
+            });
+
             var menusToDelete = Context.Menus.Where(m => m.OrganisationId == organisation.Id);
 
             Context.MenuAddOnItems.RemoveRange(menuAddOnItemsToDelete);
-            Context.MenuItemsOnMenus.RemoveRange(menuItemsOnMenusToDelete);
+            Context.MenuItemAttachments.RemoveRange(menuItemAttachmentsToDelete);
+            Context.MenuItemMenus.RemoveRange(menuItemMenusToDelete);
+            Context.AddOnItemAttachments.RemoveRange(addOnItemAttachmentsToDelete);
             Context.AddOnItems.RemoveRange(addOnItemsToDelete);
             Context.MenuItems.RemoveRange(menuItemsToDelete);
             Context.Menus.RemoveRange(menusToDelete);

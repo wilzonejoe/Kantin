@@ -27,12 +27,17 @@ namespace Kantin.Data.Models
         public virtual ICollection<MenuAddOnItem> MenuAddOnItems { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<MenuItemOnMenu> MenuItemsOnMenus { get; set; }
+        public virtual ICollection<MenuItemMenu> MenuItemMenus { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<MenuItemAttachment> MenuItemAttachments { get; set; }
 
         public MenuItem() : base()
         {
             Available = true;
             MenuAddOnItems = new List<MenuAddOnItem>();
+            MenuItemMenus = new List<MenuItemMenu>();
+            MenuItemAttachments = new List<MenuItemAttachment>();
         }
     }
 }
