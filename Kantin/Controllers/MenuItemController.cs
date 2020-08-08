@@ -26,7 +26,7 @@ namespace Kantin.Controllers
     [Route("api/[controller]")]
     public class MenuItemController : Controller
     {
-        private KantinEntities _entities;
+        private readonly KantinEntities _entities;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
@@ -44,11 +44,9 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get([FromQuery]Query query)
         {
-            using (var service = new MenuItemsProvider(_entities))
-            {
-                var result = await service.GetAll(query);
-                return Ok(result);
-            }
+            using var service = new MenuItemsProvider(_entities);
+            var result = await service.GetAll(query);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -59,12 +57,10 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
-            using (var service = new MenuItemsProvider(_entities))
-            {
-                var result = await service.Get(id);
-                var response = _mapper.Map<EditableMenuItemResponse>(result);
-                return Ok(response);
-            }
+            using var service = new MenuItemsProvider(_entities);
+            var result = await service.Get(id);
+            var response = _mapper.Map<EditableMenuItemResponse>(result);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -98,12 +94,10 @@ namespace Kantin.Controllers
         {
             var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new MenuItemsProvider(_entities, accountIdentity))
-            {
-                var result = await service.Update(id, menuItem);
-                var response = _mapper.Map<EditableMenuItemResponse>(result);
-                return Ok(response);
-            }
+            using var service = new MenuItemsProvider(_entities, accountIdentity);
+            var result = await service.Update(id, menuItem);
+            var response = _mapper.Map<EditableMenuItemResponse>(result);
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
@@ -116,14 +110,12 @@ namespace Kantin.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new MenuItemsProvider(_entities, accountIdentity))
-            {
-                var result = await service.Delete(id);
-                if (result)
-                    return NoContent();
+            using var service = new MenuItemsProvider(_entities, accountIdentity);
+            var result = await service.Delete(id);
+            if (result)
+                return NoContent();
                 
-                return NotFound();
-            }
+            return NotFound();
         }
 
         [HttpPost("{id}/Upload")]
@@ -144,35 +136,33 @@ namespace Kantin.Controllers
             var files = Request.Form.Files;
             var result = new List<UploadResult>();
 
-            using (var service = new MenuItemAttachmentsProvider(_entities, accountIdentity))
+            using var service = new MenuItemAttachmentsProvider(_entities, accountIdentity);
+            var organisationId = accountIdentity.OrganisationId.Value;
+
+            foreach (var file in files)
             {
-                var organisationId = accountIdentity.OrganisationId.Value;
+                var data = file.OpenReadStream();
+                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
 
-                foreach (var file in files)
+                var attachment = await service.Create(new MenuItemAttachment
                 {
-                    var data = file.OpenReadStream();
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    FileName = fileName,
+                    OrganisationId = organisationId,
+                    MenuItemId = id
+                });
 
-                    var attachment = await service.Create(new MenuItemAttachment
-                    {
-                        FileName = fileName,
-                        OrganisationId = organisationId,
-                        MenuItemId = id
-                    });
+                var uploadResult = await fileStorageHelper.Upload(new UploadFile
+                {
+                    AttachmentId = attachment.Id,
+                    OrganisationId = organisationId,
+                    FileName = fileName,
+                    Data = data
+                });
 
-                    var uploadResult = await fileStorageHelper.Upload(new UploadFile
-                    {
-                        AttachmentId = attachment.Id,
-                        OrganisationId = organisationId,
-                        FileName = fileName,
-                        Data = data
-                    });
-
-                    result.Add(uploadResult);
-                }
-
-                return Ok(result);
+                result.Add(uploadResult);
             }
+
+            return Ok(result);
         }
 
         [HttpGet("{id}/Download/{attachmentId}")]
@@ -188,22 +178,20 @@ namespace Kantin.Controllers
 
             if (!accountIdentity.AccountId.HasValue || !accountIdentity.OrganisationId.HasValue)
                 return Unauthorized();
-            using (var service = new MenuItemAttachmentsProvider(_entities, accountIdentity))
+            using var service = new MenuItemAttachmentsProvider(_entities, accountIdentity);
+            var organisationId = accountIdentity.OrganisationId.Value;
+
+            var attachment = await service.Get(attachmentId);
+            if (attachment.MenuItemId != id)
+                return NotFound();
+
+            var fileStorageHelper = new FileStorageHelper(_configuration);
+            var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
+            var mimeType = FileHelpers.GetMimeType(downloadResult.FileName);
+            return new FileStreamResult(downloadResult.Data, mimeType)
             {
-                var organisationId = accountIdentity.OrganisationId.Value;
-
-                var attachment = await service.Get(attachmentId);
-                if (attachment.MenuItemId != id)
-                    return NotFound();
-
-                var fileStorageHelper = new FileStorageHelper(_configuration);
-                var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
-                var mimeType = FileHelpers.GetMimeType(downloadResult.FileName);
-                return new FileStreamResult(downloadResult.Data, mimeType)
-                {
-                    FileDownloadName = downloadResult.FileName
-                };
-            }
+                FileDownloadName = downloadResult.FileName
+            };
         }
     }
 }

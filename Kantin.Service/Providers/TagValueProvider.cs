@@ -44,9 +44,6 @@ namespace Kantin.Service.Providers
                     isTargetItemValid = Context.AddOnItems.Any(m => m.Id == entity.ItemId &&
                         m.OrganisationId == AccountIdentity.OrganisationId);
                     break;
-                default:
-                    isTargetItemValid = false;
-                    break;
             }
 
 

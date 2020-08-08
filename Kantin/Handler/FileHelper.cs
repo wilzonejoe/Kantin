@@ -50,8 +50,7 @@ namespace Kantin.Handler
         public static string GetMimeType(string fileName)
         {
             var provider = new FileExtensionContentTypeProvider();
-            string contentType;
-            if (!provider.TryGetContentType(fileName, out contentType))
+            if (!provider.TryGetContentType(fileName, out var contentType))
             {
                 contentType = "application/octet-stream";
             }
@@ -100,28 +99,26 @@ namespace Kantin.Handler
 
             try
             {
-                using (var memoryStream = new MemoryStream())
+                await using var memoryStream = new MemoryStream();
+                await formFile.CopyToAsync(memoryStream);
+
+                if (memoryStream.Length == 0)
                 {
-                    await formFile.CopyToAsync(memoryStream);
+                    modelState.AddModelError(formFile.Name,
+                        $"{fieldDisplayName}({trustedFileNameForDisplay}) is empty.");
+                }
 
-                    if (memoryStream.Length == 0)
-                    {
-                        modelState.AddModelError(formFile.Name,
-                            $"{fieldDisplayName}({trustedFileNameForDisplay}) is empty.");
-                    }
-
-                    if (!IsValidFileExtensionAndSignature(
-                        formFile.FileName, memoryStream, permittedExtensions))
-                    {
-                        modelState.AddModelError(formFile.Name,
-                            $"{fieldDisplayName}({trustedFileNameForDisplay}) file " +
-                            "type isn't permitted or the file's signature " +
-                            "doesn't match the file's extension.");
-                    }
-                    else
-                    {
-                        return memoryStream.ToArray();
-                    }
+                if (!IsValidFileExtensionAndSignature(
+                    formFile.FileName, memoryStream, permittedExtensions))
+                {
+                    modelState.AddModelError(formFile.Name,
+                        $"{fieldDisplayName}({trustedFileNameForDisplay}) file " +
+                        "type isn't permitted or the file's signature " +
+                        "doesn't match the file's extension.");
+                }
+                else
+                {
+                    return memoryStream.ToArray();
                 }
             }
             catch (Exception ex)
@@ -140,33 +137,31 @@ namespace Kantin.Handler
         {
             try
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await section.Body.CopyToAsync(memoryStream);
+                await using var memoryStream = new MemoryStream();
+                await section.Body.CopyToAsync(memoryStream);
 
-                    // Check if the file is empty or exceeds the size limit.
-                    if (memoryStream.Length == 0)
-                    {
-                        modelState.AddModelError("File", "The file is empty.");
-                    }
-                    else if (memoryStream.Length > sizeLimit)
-                    {
-                        var megabyteSizeLimit = sizeLimit / 1048576;
-                        modelState.AddModelError("File",
+                // Check if the file is empty or exceeds the size limit.
+                if (memoryStream.Length == 0)
+                {
+                    modelState.AddModelError("File", "The file is empty.");
+                }
+                else if (memoryStream.Length > sizeLimit)
+                {
+                    var megabyteSizeLimit = sizeLimit / 1048576;
+                    modelState.AddModelError("File",
                         $"The file exceeds {megabyteSizeLimit:N1} MB.");
-                    }
-                    else if (!IsValidFileExtensionAndSignature(
-                        contentDisposition.FileName.Value, memoryStream,
-                        permittedExtensions))
-                    {
-                        modelState.AddModelError("File",
-                            "The file type isn't permitted or the file's " +
-                            "signature doesn't match the file's extension.");
-                    }
-                    else
-                    {
-                        return memoryStream.ToArray();
-                    }
+                }
+                else if (!IsValidFileExtensionAndSignature(
+                    contentDisposition.FileName.Value, memoryStream,
+                    permittedExtensions))
+                {
+                    modelState.AddModelError("File",
+                        "The file type isn't permitted or the file's " +
+                        "signature doesn't match the file's extension.");
+                }
+                else
+                {
+                    return memoryStream.ToArray();
                 }
             }
             catch (Exception ex)
@@ -195,42 +190,40 @@ namespace Kantin.Handler
 
             data.Position = 0;
 
-            using (var reader = new BinaryReader(data))
+            using var reader = new BinaryReader(data);
+            if (ext.Equals(".txt") || ext.Equals(".csv") || ext.Equals(".prn"))
             {
-                if (ext.Equals(".txt") || ext.Equals(".csv") || ext.Equals(".prn"))
+                if (_allowedChars.Length == 0)
                 {
-                    if (_allowedChars.Length == 0)
+                    for (var i = 0; i < data.Length; i++)
                     {
-                        for (var i = 0; i < data.Length; i++)
+                        if (reader.ReadByte() > sbyte.MaxValue)
                         {
-                            if (reader.ReadByte() > sbyte.MaxValue)
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
-                    else
+                }
+                else
+                {
+                    for (var i = 0; i < data.Length; i++)
                     {
-                        for (var i = 0; i < data.Length; i++)
+                        var b = reader.ReadByte();
+                        if (b > sbyte.MaxValue ||
+                            !_allowedChars.Contains(b))
                         {
-                            var b = reader.ReadByte();
-                            if (b > sbyte.MaxValue ||
-                                !_allowedChars.Contains(b))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
-
-                    return true;
                 }
 
-                var signatures = _fileSignature[ext];
-                var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
-
-                return signatures.Any(signature =>
-                    headerBytes.Take(signature.Length).SequenceEqual(signature));
+                return true;
             }
+
+            var signatures = _fileSignature[ext];
+            var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
+
+            return signatures.Any(signature =>
+                headerBytes.Take(signature.Length).SequenceEqual(signature));
         }
     }
 }

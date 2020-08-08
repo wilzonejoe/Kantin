@@ -15,7 +15,7 @@ namespace Kantin.Controllers.Tag
     [Route("api/[controller]")]
     public class TagValueController: Controller
     {
-        private KantinEntities _entities;
+        private readonly KantinEntities _entities;
         public TagValueController(KantinEntities entities) { _entities = entities; }
 
         [HttpGet]
@@ -25,11 +25,9 @@ namespace Kantin.Controllers.Tag
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get()
         {
-            using (var service = new TagValueProvider(_entities))
-            {
-                var result = await service.GetAll(null);
-                return Ok(result);
-            }
+            using var service = new TagValueProvider(_entities);
+            var result = await service.GetAll(null);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -40,11 +38,9 @@ namespace Kantin.Controllers.Tag
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
-            using (var service = new TagValueProvider(_entities))
-            {
-                var result = await service.Get(id);
-                return Ok(result);
-            }
+            using var service = new TagValueProvider(_entities);
+            var result = await service.Get(id);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -57,11 +53,9 @@ namespace Kantin.Controllers.Tag
         public async Task<IActionResult> Post([FromBody]TagValue tags)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
-            {
-                var result = await service.Create(tags);
-                return Created($"api/tags/{result.Id}", result);
-            }
+            using var service = new TagValueProvider(_entities, accountIdentity);
+            var result = await service.Create(tags);
+            return Created($"api/tags/{result.Id}", result);
         }
 
         [HttpPut("{id}")]
@@ -91,14 +85,12 @@ namespace Kantin.Controllers.Tag
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
-            {
-                var result = await service.Delete(id);
-                if (result)
-                    return NoContent();
+            using var service = new TagValueProvider(_entities, accountIdentity);
+            var result = await service.Delete(id);
+            if (result)
+                return NoContent();
 
-                return NotFound();
-            }
+            return NotFound();
         }
     }
 }

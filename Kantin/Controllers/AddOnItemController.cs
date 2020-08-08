@@ -23,7 +23,7 @@ namespace Kantin.Controllers
     [Route("api/[controller]")]
     public class AddOnItemController : Controller
     {
-        private KantinEntities _entities;
+        private readonly KantinEntities _entities;
         private readonly IConfiguration _configuration;
 
         public AddOnItemController(KantinEntities entities, IConfiguration configuration)
@@ -39,11 +39,9 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get([FromQuery]Query query)
         {
-            using (var service = new AddOnItemsProvider(_entities))
-            {
-                var result = await service.GetAll(query);
-                return Ok(result);
-            }
+            using var service = new AddOnItemsProvider(_entities);
+            var result = await service.GetAll(query);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -54,11 +52,9 @@ namespace Kantin.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(ApiError))]
         public async Task<IActionResult> Get(Guid id)
         {
-            using (var service = new AddOnItemsProvider(_entities))
-            {
-                var result = await service.Get(id);
-                return Ok(result);
-            }
+            using var service = new AddOnItemsProvider(_entities);
+            var result = await service.Get(id);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -71,11 +67,9 @@ namespace Kantin.Controllers
         public async Task<IActionResult> Post([FromBody]AddOnItem addOnItem)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
-            {
-                var result = await service.Create(addOnItem);
-                return Created($"api/addOnItem/{result.Id}", result);
-            }
+            using var service = new AddOnItemsProvider(_entities, accountIdentity);
+            var result = await service.Create(addOnItem);
+            return Created($"api/addOnItem/{result.Id}", result);
         }
 
         [HttpPut("{id}")]
@@ -89,11 +83,9 @@ namespace Kantin.Controllers
         public async Task<IActionResult> Put(Guid id, [FromBody]AddOnItem addOnItem)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
-            {
-                var result = await service.Update(id, addOnItem);
-                return Ok(result);
-            }
+            using var service = new AddOnItemsProvider(_entities, accountIdentity);
+            var result = await service.Update(id, addOnItem);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
@@ -106,14 +98,12 @@ namespace Kantin.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new AddOnItemsProvider(_entities, accountIdentity))
-            {
-                var result = await service.Delete(id);
-                if (result)
-                    return NoContent();
+            using var service = new AddOnItemsProvider(_entities, accountIdentity);
+            var result = await service.Delete(id);
+            if (result)
+                return NoContent();
 
-                return NotFound();
-            }
+            return NotFound();
         }
 
         [HttpPost("{id}")]
@@ -134,35 +124,33 @@ namespace Kantin.Controllers
             var files = Request.Form.Files;
             var result = new List<UploadResult>();
 
-            using (var service = new AddOnItemAttachmentsProvider(_entities, accountIdentity))
+            using var service = new AddOnItemAttachmentsProvider(_entities, accountIdentity);
+            var organisationId = accountIdentity.OrganisationId.Value;
+
+            foreach (var file in files)
             {
-                var organisationId = accountIdentity.OrganisationId.Value;
+                var data = file.OpenReadStream();
+                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
 
-                foreach (var file in files)
+                var attachment = await service.Create(new AddOnItemAttachment
                 {
-                    var data = file.OpenReadStream();
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    FileName = fileName,
+                    OrganisationId = organisationId,
+                    AddOnItemId = id
+                });
 
-                    var attachment = await service.Create(new AddOnItemAttachment
-                    {
-                        FileName = fileName,
-                        OrganisationId = organisationId,
-                        AddOnItemId = id
-                    });
+                var uploadResult = await fileStorageHelper.Upload(new UploadFile
+                {
+                    AttachmentId = attachment.Id,
+                    OrganisationId = organisationId,
+                    FileName = fileName,
+                    Data = data
+                });
 
-                    var uploadResult = await fileStorageHelper.Upload(new UploadFile
-                    {
-                        AttachmentId = attachment.Id,
-                        OrganisationId = organisationId,
-                        FileName = fileName,
-                        Data = data
-                    });
-
-                    result.Add(uploadResult);
-                }
-
-                return Ok(result);
+                result.Add(uploadResult);
             }
+
+            return Ok(result);
         }
 
         [HttpGet("{id}/Upload")]
@@ -178,22 +166,20 @@ namespace Kantin.Controllers
 
             if (!accountIdentity.AccountId.HasValue || !accountIdentity.OrganisationId.HasValue)
                 return Unauthorized();
-            using (var service = new AddOnItemAttachmentsProvider(_entities, accountIdentity))
+            using var service = new AddOnItemAttachmentsProvider(_entities, accountIdentity);
+            var organisationId = accountIdentity.OrganisationId.Value;
+
+            var attachment = await service.Get(attachmentId);
+            if (attachment.AddOnItemId != id)
+                return NotFound();
+
+            var fileStorageHelper = new FileStorageHelper(_configuration);
+            var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
+            var mimeType = FileHelper.GetMimeType(downloadResult.FileName);
+            return new FileStreamResult(downloadResult.Data, mimeType)
             {
-                var organisationId = accountIdentity.OrganisationId.Value;
-
-                var attachment = await service.Get(attachmentId);
-                if (attachment.AddOnItemId != id)
-                    return NotFound();
-
-                var fileStorageHelper = new FileStorageHelper(_configuration);
-                var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
-                var mimeType = FileHelpers.GetMimeType(downloadResult.FileName);
-                return new FileStreamResult(downloadResult.Data, mimeType)
-                {
-                    FileDownloadName = downloadResult.FileName
-                };
-            }
+                FileDownloadName = downloadResult.FileName
+            };
         }
     }
 }
