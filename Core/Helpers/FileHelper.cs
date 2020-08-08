@@ -12,9 +12,9 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
-namespace Kantin.Handler
+namespace Core.Helpers
 {
-    public static class FileHelpers
+    public static class FileHelper
     {
         private static readonly byte[] _allowedChars = { };
         private static readonly Dictionary<string, List<byte[]>> _fileSignature = new Dictionary<string, List<byte[]>>

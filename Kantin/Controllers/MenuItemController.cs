@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Exceptions.Models;
@@ -12,7 +10,6 @@ using Core.Model;
 using Core.Models.File;
 using Kantin.Data;
 using Kantin.Data.Models;
-using Kantin.Handler;
 using Kantin.Models.Request;
 using Kantin.Models.Response;
 using Kantin.Service.Attributes;
@@ -73,13 +70,11 @@ namespace Kantin.Controllers
         public async Task<IActionResult> Post([FromBody]EditableMenuItemRequest editableMenuItem)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new MenuItemsProvider(_entities, accountIdentity))
-            {
-                var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
-                var result = await service.Create(menuItem);
-                var response = _mapper.Map<EditableMenuItemResponse>(result);
-                return Created($"api/menuItem/{result.Id}", response);
-            }
+            using var service = new MenuItemsProvider(_entities, accountIdentity);
+            var menuItem = _mapper.Map<MenuItem>(editableMenuItem);
+            var result = await service.Create(menuItem);
+            var response = _mapper.Map<EditableMenuItemResponse>(result);
+            return Created($"api/menuItem/{result.Id}", response);
         }
 
         [HttpPut("{id}")]
@@ -187,7 +182,7 @@ namespace Kantin.Controllers
 
             var fileStorageHelper = new FileStorageHelper(_configuration);
             var downloadResult = await fileStorageHelper.Download(organisationId, attachmentId, attachment.FileName);
-            var mimeType = FileHelpers.GetMimeType(downloadResult.FileName);
+            var mimeType = FileHelper.GetMimeType(downloadResult.FileName);
             return new FileStreamResult(downloadResult.Data, mimeType)
             {
                 FileDownloadName = downloadResult.FileName

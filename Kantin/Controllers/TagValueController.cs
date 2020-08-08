@@ -69,11 +69,9 @@ namespace Kantin.Controllers.Tag
         public async Task<IActionResult> Put(Guid id, [FromBody]TagValue tagValue)
         {
             var accountIdentity = AccountIdentityService.GenerateAccountIdentityFromClaims(_entities, HttpContext.User.Claims);
-            using (var service = new TagValueProvider(_entities, accountIdentity))
-            {
-                var result = await service.Update(id, tagValue);
-                return Ok(result);
-            }
+            using var service = new TagValueProvider(_entities, accountIdentity);
+            var result = await service.Update(id, tagValue);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
