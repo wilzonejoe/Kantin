@@ -1,28 +1,45 @@
 ﻿using Core.Helpers;
 using Kantin.Data.Models;
+using Kantin.Service.Models.Auth;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 
 namespace Kantin.Service.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class UserAuthorizationAttribute : AuthorizeAttribute, IAuthorizationFilter
     {
+        private readonly bool AllowAnonymous;
         private const string AuthorizationKey = "Authorization";
         private const string AuthorizationScheme = JwtBearerDefaults.AuthenticationScheme;
         private readonly string[] _privilegeNames;
 
-        public UserAuthorizationAttribute() { _privilegeNames = new string[] { }; }
+        public UserAuthorizationAttribute(bool allowAnonymous = false)
+        {
+            AllowAnonymous = allowAnonymous;
+            _privilegeNames = new string[] { };
+        }
 
-        public UserAuthorizationAttribute(string privilegeName) { _privilegeNames = new string[] { privilegeName }; }
+        public UserAuthorizationAttribute(string privilegeName)
+        {
+            AllowAnonymous = false;
+            _privilegeNames = new string[] { privilegeName };
+        }
 
-        public UserAuthorizationAttribute(string[] privilegeNames) { _privilegeNames = privilegeNames; }
+        public UserAuthorizationAttribute(string[] privilegeNames)
+        {
+            AllowAnonymous = false;
+            _privilegeNames = privilegeNames;
+        }
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
@@ -35,12 +52,14 @@ namespace Kantin.Service.Attributes
             var tokenService = context.HttpContext.RequestServices.GetService<ITokenAuthorizationService>();
             var session = tokenService.AuthorizeToken(token);
 
-            if (session == null)
+            if (session == null && !AllowAnonymous)
             {
                 context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Unauthorized);
             }
             else
             {
+                SetHttpContextUser(session, context.HttpContext);
+
                 if (session?.Account?.OrganisationId == null)
                     return;
 
@@ -53,6 +72,22 @@ namespace Kantin.Service.Attributes
                 if (!CanAccessController(session))
                     context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.Forbidden);
             }
+        }
+
+        private void SetHttpContextUser(Session session, HttpContext context)
+        {
+            if (session == null || context == null)
+                return;
+
+            var claim = new ClaimWrapper(session.Account);
+            var role = session.Account.Privilege;
+
+            var roles = new List<string>();
+
+            if (role != null)
+                roles.Add(role?.Name);
+
+            context.User = new GenericPrincipal(claim, roles.ToArray());
         }
 
         private bool HasAuthorizationScheme(string authorizationHeaderValue)

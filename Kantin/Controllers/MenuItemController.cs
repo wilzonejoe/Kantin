@@ -35,6 +35,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<MenuItem>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
@@ -47,6 +48,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EditableMenuItemResponse))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -114,7 +116,7 @@ namespace Kantin.Controllers
         }
 
         [HttpPost("{id}/Upload")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
@@ -161,7 +163,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}/Download/{attachmentId}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(FileStreamResult))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

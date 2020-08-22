@@ -104,6 +104,7 @@ namespace Kantin.Service.Providers
                 Id = Guid.NewGuid(),
                 AccountId = AccountIdentity.AccountId.Value,
                 OrganisationId = organisationId,
+                Name = "Admin",
                 CanAccessMenu = true,
                 CanAccessOrder = true,
                 CanAccessStaffMember = true,

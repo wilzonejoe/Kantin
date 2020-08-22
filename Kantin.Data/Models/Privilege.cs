@@ -5,6 +5,7 @@ namespace Kantin.Data.Models
 {
     public class Privilege : BasePrivilege
     {
+        public string Name { get; set; }
         public bool CanAccessMenu { get; set; }
         public bool CanAccessOrder { get; set; }
         public bool CanAccessStaffMember { get; set; }

@@ -28,6 +28,7 @@ namespace Kantin.Extensions
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+                option.SaveToken = true;
             });
         }
     }

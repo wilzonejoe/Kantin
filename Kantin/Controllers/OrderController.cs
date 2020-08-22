@@ -25,6 +25,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Order>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
@@ -39,6 +40,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Order))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -93,6 +95,7 @@ namespace Kantin.Controllers
         }
 
         [HttpDelete("{id}")]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

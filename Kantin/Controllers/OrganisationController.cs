@@ -76,7 +76,7 @@ namespace Kantin.Controllers
         }
 
         [HttpPut("{id}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessSettings))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Organisation))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
@@ -94,7 +94,7 @@ namespace Kantin.Controllers
         }
 
         [HttpDelete("{id}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessSettings))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

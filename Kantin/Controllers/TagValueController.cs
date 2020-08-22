@@ -6,6 +6,7 @@ using Core.Exceptions.Models;
 using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
+using Kantin.Service.Attributes;
 using Kantin.Service.Providers;
 using Kantin.Service.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,7 @@ namespace Kantin.Controllers.Tag
         }
 
         [HttpPost]
+        [UserAuthorization(nameof(Privilege.CanAccessSettings))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(TagValue))]
         [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ApiError))]
@@ -59,6 +61,7 @@ namespace Kantin.Controllers.Tag
         }
 
         [HttpPut("{id}")]
+        [UserAuthorization(nameof(Privilege.CanAccessSettings))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TagValue))]
         [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(ApiError))]
@@ -75,6 +78,7 @@ namespace Kantin.Controllers.Tag
         }
 
         [HttpDelete("{id}")]
+        [UserAuthorization(nameof(Privilege.CanAccessSettings))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

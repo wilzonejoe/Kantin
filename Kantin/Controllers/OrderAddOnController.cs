@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Exceptions.Models;
 using Core.Model;
-using Core.Models.Auth;
 using Kantin.Data;
 using Kantin.Data.Models;
 using Kantin.Service.Attributes;
@@ -25,6 +24,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<OrderAddOn>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
@@ -39,6 +39,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(OrderAddOn))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -89,6 +90,7 @@ namespace Kantin.Controllers
         }
 
         [HttpDelete("{id}")]
+        [UserAuthorization]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

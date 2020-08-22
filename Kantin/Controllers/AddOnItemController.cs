@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using Core.Exceptions.Models;
 using Core.Helpers;
@@ -11,7 +10,6 @@ using Core.Model;
 using Core.Models.File;
 using Kantin.Data;
 using Kantin.Data.Models;
-using Kantin.Handler;
 using Kantin.Service.Attributes;
 using Kantin.Service.Providers;
 using Kantin.Service.Services;
@@ -33,6 +31,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<AddOnItem>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
@@ -45,6 +44,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(AddOnItem))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
@@ -107,7 +107,7 @@ namespace Kantin.Controllers
         }
 
         [HttpPost("{id}")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiError))]
@@ -154,7 +154,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}/Upload")]
-        [UserAuthorization]
+        [UserAuthorization(nameof(Privilege.CanAccessMenu))]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(File))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]

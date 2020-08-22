@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Helpers;
 
 namespace Kantin.Service.Services
 {
@@ -21,10 +22,21 @@ namespace Kantin.Service.Services
 
         public Session AuthorizeToken(string token)
         {
+            var tokenClaims = JWTHelper.Instance.GetTokenClaims(token);
+
+            if (tokenClaims == null)
+                return null;
+
+            var accountClaim = tokenClaims.FirstOrDefault(tc => tc.Type == nameof(AccountIdentity.AccountId));
+            var accountId = accountClaim.Value;
+
+            if (string.IsNullOrEmpty(accountId) || !Guid.TryParse(accountId, out var accountIdGuid))
+                return null;
+
             return Context.Sessions
                 .Include(s => s.Account)
                 .ThenInclude(a => a.Privilege)
-                .FirstOrDefault(s => s.Token == token);
+                .FirstOrDefault(s => s.AccountId == accountIdGuid);
         }
 
         public async Task SaveToken(string token, Guid accountId)

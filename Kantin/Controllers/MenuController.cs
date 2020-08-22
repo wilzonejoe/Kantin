@@ -29,6 +29,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Menu>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(ApiError))]
@@ -41,6 +42,7 @@ namespace Kantin.Controllers
         }
 
         [HttpGet("{id}")]
+        [UserAuthorization(true)]
         [Produces(SwaggerConstant.JsonResponseType)]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(EditableMenuResponse))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiError))]
