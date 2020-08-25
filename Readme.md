@@ -24,7 +24,7 @@ Structure
     - Handlers
 
 - Tests
-    - Unit tests
+    - Automation tests with specflow
 
 - Core
     - Generic Provider
