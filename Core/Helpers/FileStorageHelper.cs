@@ -14,7 +14,8 @@ namespace Core.Helpers
         public FileStorageHelper(IConfiguration configuration)
         {
             var credential = new AzureStorageCredential();
-            configuration.GetSection("Azure").Bind(credential);
+            var azureSection = configuration.GetSection("Azure");
+            azureSection.Bind(credential);
             _connectionString = credential.StorageConnectionString;
         }
 
